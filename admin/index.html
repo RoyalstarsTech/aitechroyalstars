@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin | Royalstars AI for Customer Growth</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/app.css">
+<style>
+body{background:#F4F6FC}
+.top{background:var(--navy);color:#fff}
+.top .wrap{display:flex;justify-content:space-between;align-items:center;height:64px}
+.top button{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:999px;padding:7px 16px;font:inherit;font-size:14px;cursor:pointer}
+.login{max-width:420px;margin:90px auto;background:#fff;border-radius:22px;padding:32px;box-shadow:var(--shadow)}
+.login h1{font-size:24px;color:var(--navy2);margin-bottom:6px}
+.login p{color:var(--muted);font-size:14px;margin-bottom:18px}
+.tabs{display:flex;gap:8px;margin:26px 0 18px;flex-wrap:wrap}
+.tabs button{font:inherit;font-weight:600;font-size:14px;border:1px solid var(--line);background:#fff;color:var(--navy2);border-radius:999px;padding:9px 18px;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--navy2);color:#fff;border-color:var(--navy2)}
+.card{background:#fff;border-radius:18px;padding:24px;box-shadow:0 6px 20px rgba(6,16,63,.06);margin-bottom:20px}
+.card h2{font-size:20px;margin-bottom:4px}
+.card .sub{color:var(--muted);font-size:14px;margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px}
+.stat{background:#fff;border-radius:16px;padding:18px;box-shadow:0 6px 20px rgba(6,16,63,.06)}
+.stat b{display:block;font-size:28px;color:var(--navy2)}
+.stat span{font-size:13px;color:var(--muted)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.toolbar input,.toolbar select{font:inherit;font-size:14px;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px}
+.toolbar .grow{flex:1;min-width:200px}
+.sbtn{font:inherit;font-size:14px;font-weight:600;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--navy2);color:#fff}
+.sbtn.gold{background:var(--gold);color:var(--navy)}
+.sbtn.light{background:var(--ice);color:var(--navy2)}
+.sbtn.danger{background:#FDECEC;color:var(--red)}
+.sbtn:disabled{opacity:.5;cursor:not-allowed}
+.tbl{width:100%;overflow:auto;border:1px solid var(--line);border-radius:14px}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:900px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid #EDF0F8;vertical-align:top}
+th{background:var(--ice);color:var(--navy2);font-weight:700;position:sticky;top:0;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.tagb{display:inline-block;font-size:11px;font-weight:800;background:var(--gold);color:var(--navy);border-radius:6px;padding:2px 7px}
+.tagp{display:inline-block;font-size:11px;font-weight:700;background:var(--ice);color:var(--royal);border-radius:6px;padding:2px 7px}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.note{background:#FFF6D6;border-radius:12px;padding:12px 14px;font-size:14px;color:var(--navy2);margin-bottom:14px}
+.err{background:#FDECEC;color:var(--red);border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:14px;display:none}
+.ok{background:#EAF7EF;color:#17733A;border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:14px;display:none}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.row2{grid-template-columns:1fr}}
+textarea{font:inherit;font-size:14px;border:1.5px solid var(--line);border-radius:12px;padding:12px;width:100%;min-height:140px}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:13px}
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap"><a class="brand" href="/"><img src="/assets/img/logo-mark.png" alt="" width="47" height="40"><span>Royalstars<small>Admin · AI for Customer Growth</small></span></a><button id="logout" hidden type="button">Log out</button></div></div>
+
+<div class="wrap">
+  <!-- LOGIN -->
+  <form class="login" id="login">
+    <h1>Admin login</h1>
+    <p>Enter the admin password set in Netlify environment variables.</p>
+    <div class="field"><label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required></div>
+    <div class="err" id="login-err"></div>
+    <button class="btn btn-navy" style="width:100%" type="submit">Log in</button>
+  </form>
+
+  <!-- APP -->
+  <div id="app" hidden>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="reg">Registrations</button>
+      <button role="tab" aria-selected="false" data-tab="cohort">Cohort settings</button>
+      <button role="tab" aria-selected="false" data-tab="certs">Certificates</button>
+    </div>
+    <div class="err" id="err"></div><div class="ok" id="ok"></div>
+
+    <!-- REGISTRATIONS -->
+    <section data-panel="reg" style="padding:0">
+      <div class="stats" id="stats"></div>
+      <div class="card">
+        <h2>Registrations</h2>
+        <p class="sub">Every form submission from the landing page. <span class="tagb">EARLY BIRD</span> marks the first 15 per cohort.</p>
+        <div class="toolbar">
+          <input class="grow" id="q" placeholder="Search name, phone, business, city…">
+          <select id="fc"><option value="">All cohorts</option></select>
+          <button class="sbtn light" id="reload" type="button">Refresh</button>
+          <button class="sbtn light" id="csv" type="button">Download CSV</button>
+          <button class="sbtn gold" id="issue" type="button" disabled>Issue participation certificates (0)</button>
+        </div>
+        <div class="tbl"><table><thead><tr><th><input type="checkbox" id="all" aria-label="Select all"></th><th>Date</th><th>Name</th><th>WhatsApp</th><th>Email</th><th>Business</th><th>Type</th><th>City</th><th>Heard from</th><th>Cohort</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- COHORT -->
+    <section data-panel="cohort" hidden style="padding:0">
+      <form class="card" id="cohort-form">
+        <h2>Cohort settings</h2>
+        <p class="sub">Shown on the landing page immediately — no redeploy needed. New registrations are tagged with the cohort name.</p>
+        <div class="row2">
+          <div class="field"><label for="s-name">Cohort name</label><input id="s-name" name="cohort_name" placeholder="e.g. Cohort 3 — November 2026" maxlength="200"></div>
+          <div class="field"><label for="s-start">Class start (Lagos time)</label><input id="s-start" type="datetime-local"></div>
+        </div>
+        <div class="field"><label for="s-wa">WhatsApp group link for this cohort</label><input id="s-wa" name="whatsapp_group" placeholder="https://chat.whatsapp.com/…" maxlength="200"></div>
+        <div class="field"><label for="s-note">Note under the date <span class="opt">(optional)</span></label><input id="s-note" name="cohort_note" placeholder="e.g. Classes hold 10am–1pm on Tuesday and Wednesday." maxlength="300"></div>
+        <div class="note">Leave the date empty to show "Date announced in the WhatsApp group". Past dates are hidden automatically.</div>
+        <button class="sbtn" type="submit">Save settings</button>
+      </form>
+    </section>
+
+    <!-- CERTIFICATES -->
+    <section data-panel="certs" hidden style="padding:0">
+      <div class="row2">
+        <form class="card" id="cert-one">
+          <h2>Add a certificate</h2>
+          <p class="sub">A unique number is created automatically.</p>
+          <div class="field"><label for="c-name">Participant name</label><input id="c-name" required maxlength="90"></div>
+          <div class="row2">
+            <div class="field"><label for="c-type">Type</label><select id="c-type"><option value="participation">Participation</option><option value="practitioner">Certified Practitioner</option></select></div>
+            <div class="field"><label for="c-date">Issue date</label><input id="c-date" type="date"></div>
+          </div>
+          <div class="field"><label for="c-cohort">Cohort <span class="opt">(optional)</span></label><input id="c-cohort" maxlength="60"></div>
+          <button class="sbtn" type="submit">Add certificate</button>
+        </form>
+        <form class="card" id="cert-bulk">
+          <h2>Add many at once</h2>
+          <p class="sub">One name per line. All get the same type, date and cohort.</p>
+          <textarea id="b-names" placeholder="Chioma Okafor&#10;Ibrahim Musa&#10;Ngozi Adeyemi"></textarea>
+          <div class="row2" style="margin-top:12px">
+            <div class="field"><label for="b-type">Type</label><select id="b-type"><option value="participation">Participation</option><option value="practitioner">Certified Practitioner</option></select></div>
+            <div class="field"><label for="b-cohort">Cohort <span class="opt">(optional)</span></label><input id="b-cohort" maxlength="60"></div>
+          </div>
+          <button class="sbtn" type="submit">Add all</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Issued certificates</h2>
+        <p class="sub">Type each number on the certificate before sending it. Anyone can confirm it at <span class="mono">/verify</span>.</p>
+        <div class="toolbar"><input class="grow" id="cq" placeholder="Search name or number…"><button class="sbtn light" id="ccsv" type="button">Download CSV</button></div>
+        <div class="tbl"><table><thead><tr><th>Number</th><th>Name</th><th>Type</th><th>Cohort</th><th>Issued</th><th>Verify link</th><th></th></tr></thead><tbody id="crows"></tbody></table></div>
+      </div>
+    </section>
+  </div>
+</div>
+<script src="/assets/js/admin.js"></script>
+</body>
+</html>
