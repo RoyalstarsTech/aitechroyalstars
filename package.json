@@ -1,0 +1,9 @@
+{
+  "name": "royalstars-ai-customer-growth",
+  "private": true,
+  "type": "module",
+  "description": "Landing page, registration, admin and certificate verification for Royalstars Technologies Ltd. — AI for Customer Growth",
+  "dependencies": {
+    "@netlify/blobs": "^11.1.4"
+  }
+}
