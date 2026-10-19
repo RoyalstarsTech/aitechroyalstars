@@ -1,4 +1,4 @@
-# AI for Customer Growth — Website
+# Grow Your Sales with AI Skills — Website
 
 Landing page, registration, admin dashboard and certificate verification for
 **Royalstars Technologies Ltd.**, built for Netlify (`royalstarstech.netlify.app`).

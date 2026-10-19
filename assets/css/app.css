@@ -279,3 +279,23 @@ footer ul{list-style:none;display:grid;gap:8px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}.reveal{opacity:1;transform:none}}
 .nav-links a.btn,.nav-links a.btn:hover{color:var(--navy)}
 .cmp{text-align:left}
+/* v2: four pillars + signature tools */
+.builds.four{grid-template-columns:repeat(4,1fr)}
+.builds .pnum{display:block;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.builds .build h3{font-size:22px}
+@media (max-width:980px){.builds.four{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.builds.four{grid-template-columns:1fr}}
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
+.tool{background:#fff;color:var(--ink);border-radius:18px;padding:24px}
+.tool b{display:block;font-size:30px;font-weight:900;color:var(--royal);line-height:1}
+.tool h4{font-size:18px;color:var(--navy2);margin:10px 0 6px}
+.tool p{font-size:15px;color:var(--muted)}
+.honest{margin-top:26px;color:#C7D2F5;font-size:15px;max-width:760px;border-left:3px solid var(--gold);padding-left:14px}
+@media (max-width:900px){.tools{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.tools{grid-template-columns:1fr}}
+.hero h1{font-size:clamp(46px,6.6vw,80px)}
+/* v3: six areas */
+.builds.six{grid-template-columns:repeat(3,1fr)}
+@media (max-width:900px){.builds.six{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.builds.six{grid-template-columns:1fr}}
+.hero h1 span{font-size:.82em}
