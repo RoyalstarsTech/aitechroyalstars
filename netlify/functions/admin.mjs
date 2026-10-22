@@ -1,5 +1,7 @@
 // Admin API (password protected): registrations, cohort settings, certificates
 import { json, siteStore, certStore, readSettings, DEFAULT_SETTINGS, normNo, randCode, issueToken, validToken, passwordOk } from '../lib/common.mjs';
+import { getStore } from '@netlify/blobs';
+const paymentStore = () => getStore({ name: 'payments', consistency: 'strong' });
 
 const API = 'https://api.netlify.com/api/v1';
 const TYPES = { participation: 'Certificate of Participation', practitioner: 'Certified AI Customer Growth Practitioner' };
@@ -13,9 +15,12 @@ async function netlify(path, init = {}) {
   return r.status === 204 ? null : r.json();
 }
 
-async function registrations(siteId) {
+const FIELDS = ['full_name', 'phone', 'email', 'participant_type', 'business_name', 'business_type', 'location', 'heard_from', 'cohort',
+  'sender_name', 'amount_paid', 'payment_date', 'payment_ref'];
+const fileUrl = (v) => (v && typeof v === 'object' ? v.url : (typeof v === 'string' && /^https?:\/\//.test(v) ? v : '')) || '';
+async function registrations(siteId, formName) {
   const forms = await netlify(`/sites/${siteId}/forms`);
-  const form = (forms || []).find((f) => f.name === 'registration');
+  const form = (forms || []).find((f) => f.name === formName);
   if (!form) return [];
   const out = [];
   for (let page = 1; page <= 20; page++) {
@@ -23,9 +28,17 @@ async function registrations(siteId) {
     out.push(...batch);
     if (batch.length < 100) break;
   }
-  return out.map((s) => ({ id: s.id, created_at: s.created_at, ...(s.data || {}) }))
-    .map(({ id, created_at, full_name, phone, email, business_name, business_type, location, heard_from, cohort }) =>
-      ({ id, created_at, full_name, phone, email, business_name, business_type, location, heard_from, cohort }));
+  const pay = paymentStore();
+  return Promise.all(out.map(async (s) => {
+    const d = s.data || {};
+    const row = { id: s.id, created_at: s.created_at };
+    for (const f of FIELDS) row[f] = typeof d[f] === 'string' ? d[f] : (d[f] == null ? '' : String(d[f]));
+    row.proof_url = fileUrl(d.proof);
+    const st = formName === 'enrollment' ? await pay.get(s.id, { type: 'json' }) : null;
+    row.payment_status = st?.status || 'pending';
+    row.payment_updated = st?.at || '';
+    return row;
+  }));
 }
 
 async function nextNumber(year) {
@@ -53,22 +66,40 @@ export default async (req, context) => {
   try {
     const siteId = context?.site?.id || process.env.SITE_ID;
 
-    if (route === 'registrations' && method === 'GET') return json({ items: await registrations(siteId) });
+    if (route === 'registrations' && method === 'GET') {
+      const formName = url.searchParams.get('form') === 'registration' ? 'registration' : 'enrollment';
+      return json({ items: await registrations(siteId, formName) });
+    }
+    if (route === 'payments' && method === 'POST') {
+      const id = clean(body.id, 40);
+      const status = ['pending', 'confirmed', 'rejected'].includes(body.status) ? body.status : null;
+      if (!/^[a-f0-9]+$/i.test(id) || !status) return json({ error: 'Bad request' }, 400);
+      const rec = { status, at: new Date().toISOString() };
+      await paymentStore().setJSON(id, rec);
+      return json(rec);
+    }
     if (route === 'registrations' && method === 'DELETE') {
       const id = clean(url.searchParams.get('id'), 40);
       if (!/^[a-f0-9]+$/i.test(id)) return json({ error: 'Bad id' }, 400);
       await netlify(`/submissions/${id}`, { method: 'DELETE' });
+      await paymentStore().delete(id).catch(() => {});
       return json({ ok: true });
     }
 
-    if (route === 'settings' && method === 'GET') return json(await readSettings());
+    if (route === 'settings' && method === 'GET') {
+      const priv = (await siteStore().get('private', { type: 'json' })) || {};
+      return json({ ...(await readSettings()), join_link: priv.join_link || '', join_message: priv.join_message || '' });
+    }
     if (route === 'settings' && method === 'PUT') {
       const s = {};
       for (const k of Object.keys(DEFAULT_SETTINGS)) s[k] = clean(body[k], k === 'cohort_note' ? 300 : 200);
       if (s.whatsapp_group && !/^https:\/\/(chat\.whatsapp\.com|wa\.me|whatsapp\.com)\//i.test(s.whatsapp_group)) return json({ error: 'WhatsApp link must start with https://chat.whatsapp.com/' }, 400);
       if (s.cohort_start && isNaN(new Date(s.cohort_start))) return json({ error: 'Invalid date' }, 400);
+      const priv = { join_link: clean(body.join_link, 300), join_message: String(body.join_message ?? '').replace(/\r/g, '').replace(/[\u0000-\u0009\u000b-\u001f<>]/g, '').trim().slice(0, 800) };
+      if (priv.join_link && !/^https:\/\//i.test(priv.join_link)) return json({ error: 'Class link must start with https://' }, 400);
       await siteStore().setJSON('settings', s);
-      return json(s);
+      await siteStore().setJSON('private', priv);
+      return json({ ...s, ...priv });
     }
 
     if (route === 'certificates' && method === 'GET') {

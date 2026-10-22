@@ -26,44 +26,83 @@
     }
   });
 
-  // ---- registration form ----
+  // ---- copy buttons ----
+  document.querySelectorAll('[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = b.getAttribute('data-copy');
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { b.textContent = 'Copied ✓'; setTimeout(function () { b.textContent = 'Copy'; }, 1800); })
+        .catch(function () { window.prompt('Copy the account number:', t); });
+    });
+  });
+
+  // ---- enrollment form ----
   var form = document.getElementById('reg-form');
   if (!form) return;
   var msg = document.getElementById('f-msg'), btn = document.getElementById('f-submit');
+  var today = new Date(); var pd = form.elements.payment_date;
+  if (pd && !pd.value) pd.value = new Date(today.getTime() - today.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
   var phoneOk = function (v) { var d = v.replace(/[^\d+]/g, ''); return /^(\+?234|0)[789]\d{9}$/.test(d) || /^\+?\d{10,15}$/.test(d); };
   var emailOk = function (v) { return !v || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); };
+  function fileOk() {
+    var f = form.elements.proof.files[0]; if (!f) return true;
+    if (/^image\//.test(f.type)) return true;
+    return f.type === 'application/pdf' && f.size <= 3 * 1024 * 1024;
+  }
   function check() {
     var ok = true;
-    var rules = { full_name: function (v) { return v.trim().length >= 3; }, phone: phoneOk, email: emailOk, business_type: function (v) { return !!v; }, location: function (v) { return v.trim().length >= 2; } };
+    var rules = {
+      full_name: function (v) { return v.trim().length >= 3; }, phone: phoneOk, email: emailOk,
+      participant_type: function (v) { return !!v; }, business_type: function (v) { return !!v; }, location: function (v) { return v.trim().length >= 2; },
+      sender_name: function (v) { return v.trim().length >= 2; }, amount_paid: function (v) { return Number(v) > 0; }, payment_date: function (v) { return !!v; }
+    };
     Object.keys(rules).forEach(function (n) {
       var f = form.elements[n], wrap = form.querySelector('[data-f="' + n + '"]');
-      var good = rules[n](f.value); wrap.classList.toggle('bad', !good); if (!good && ok) { f.focus(); } ok = ok && good;
+      var good = rules[n](f.value); wrap.classList.toggle('bad', !good); if (!good && ok) f.focus(); ok = ok && good;
     });
-    if (ok && !form.elements.consent.checked) { msg.textContent = 'Please tick the consent box so we can contact you about the training.'; msg.style.display = 'block'; ok = false; }
+    var pf = form.querySelector('[data-f="proof"]'); var fgood = fileOk(); pf.classList.toggle('bad', !fgood); ok = ok && fgood;
+    if (ok && !form.elements.paid_confirm.checked) { msg.textContent = 'Please confirm that you have made the transfer.'; msg.style.display = 'block'; ok = false; }
+    else if (ok && !form.elements.consent.checked) { msg.textContent = 'Please tick the consent box so we can contact you about the training.'; msg.style.display = 'block'; ok = false; }
     return ok;
+  }
+  // shrink large photos so uploads stay small and fast on mobile data
+  function shrink(file) {
+    return new Promise(function (resolve) {
+      if (!file || !/^image\//.test(file.type) || file.size < 350 * 1024 || !window.createImageBitmap) return resolve(file);
+      createImageBitmap(file).then(function (bmp) {
+        var max = 1400, sc = Math.min(1, max / Math.max(bmp.width, bmp.height));
+        var c = document.createElement('canvas'); c.width = Math.round(bmp.width * sc); c.height = Math.round(bmp.height * sc);
+        c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+        c.toBlob(function (b) { resolve(b ? new File([b], (file.name || 'receipt').replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }) : file); }, 'image/jpeg', 0.72);
+      }).catch(function () { resolve(file); });
+    });
   }
   form.addEventListener('input', function (e) { var w = e.target.closest('.field'); if (w) w.classList.remove('bad'); msg.style.display = 'none'; });
   form.addEventListener('submit', function (e) {
     e.preventDefault(); msg.style.display = 'none';
     if (!check()) return;
     btn.disabled = true; btn.textContent = 'Submitting…';
-    var data = new URLSearchParams(new FormData(form)).toString();
-    fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: data })
-      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); })
+    var fd = new FormData(form);
+    shrink(form.elements.proof.files[0]).then(function (f) {
+      if (f) fd.set('proof', f, f.name || 'receipt.jpg'); else fd.delete('proof');
+      return fetch('/', { method: 'POST', body: fd });
+    }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); })
       .then(function () {
-        window.track('generate_lead', { form: 'registration', business_type: form.elements.business_type.value });
+        window.track('generate_lead', { form: 'enrollment', value: Number(form.elements.amount_paid.value) || 0, currency: 'NGN' });
+        var name = form.elements.full_name.value.trim();
+        document.getElementById('s-name').textContent = name;
+        var C = window.SITE_CONFIG || {};
+        var text = 'Hello Royalstars, I just enrolled for Grow Your Sales with AI Skills (Cohort 1).\nName: ' + name +
+          '\nPhone: ' + form.elements.phone.value.trim() + '\nAmount: ₦' + form.elements.amount_paid.value +
+          '\nPaid from: ' + form.elements.sender_name.value.trim() + '\nDate: ' + form.elements.payment_date.value + '\nHere is my payment receipt:';
+        document.getElementById('s-receipt').href = 'https://wa.me/' + (C.PHONE_INTL || '2347039106808') + '?text=' + encodeURIComponent(text);
         form.style.display = 'none';
         var ok = document.getElementById('reg-success'); ok.style.display = 'block';
         ok.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        window.siteSettings.then(function (S) {
-          var url = S.whatsapp_group;
-          if (!url) { document.getElementById('wa-auto').textContent = ''; return; }
-          setTimeout(function () { window.location.href = url; }, 2500);
-        });
       })
       .catch(function () {
-        btn.disabled = false; btn.textContent = 'Register & join WhatsApp group';
-        msg.innerHTML = 'Sorry, something went wrong. Please try again, or join the <a class="js-wa" target="_blank" rel="noopener" href="' + ((window.SITE_CONFIG || {}).WHATSAPP_GROUP || '#') + '">WhatsApp group</a> directly.';
+        btn.disabled = false; btn.textContent = 'Submit my enrollment';
+        var C = window.SITE_CONFIG || {};
+        msg.innerHTML = 'Sorry, something went wrong. Please try again, or send your name and payment receipt on WhatsApp to <a target="_blank" rel="noopener" href="https://wa.me/' + (C.PHONE_INTL || '2347039106808') + '">' + (C.PHONE || '07039106808') + '</a>.';
         msg.style.display = 'block';
       });
   });

@@ -53,7 +53,7 @@
       <a href="#challenge">Certificates</a>
       <a href="#faq">FAQ</a>
       <a href="/verify/">Verify certificate</a>
-      <a class="btn btn-gold" href="#register" data-cta="nav">Register</a>
+      <a class="btn btn-gold" href="#register" data-cta="nav">Enrol now</a>
     </nav>
   </div>
 </header>
@@ -73,7 +73,7 @@
       <h1 id="hero-title">Grow Your Sales <span>with AI Skills</span></h1>
       <p class="sub">A practical live class for <b>business owners, students, graduates and young entrepreneurs</b>. Use AI on your phone — even by voice — to find customers, sell more, show up online and keep proper records.</p>
       <div class="ctas">
-        <a class="btn btn-gold" href="#register" data-cta="hero">Register now — it takes 1 minute</a>
+        <a class="btn btn-gold" href="#register" data-cta="hero">Enrol now — ₦15,000</a>
         <a class="btn btn-ghost js-wa" href="#" data-cta="hero-wa" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg>Join WhatsApp group</a>
       </div>
       <div class="chips"><span class="chip">Easy Lane + Sharp Lane</span><span class="chip">Live on Zoom / Google Meet</span><span class="chip">Certificate for every participant</span></div>
@@ -190,8 +190,8 @@
   <div class="wrap">
     <div class="eb-card reveal">
       <div class="eb-tag">EARLY<br>BIRD</div>
-      <p>The <b>first 15 participants</b> to register get <b>6 months FREE Google Gemini AI</b> + <b>Google One storage credit</b>.</p>
-      <a class="btn btn-navy" href="#register" data-cta="earlybird">Claim my spot</a>
+      <p>The <b>first 15 confirmed paid participants</b> get <b>6 months FREE Google Gemini AI</b> + <b>Google One storage credit</b>.</p>
+      <a class="btn btn-navy" href="#register" data-cta="earlybird">Enrol now</a>
     </div>
   </div>
 </div>
@@ -204,12 +204,12 @@
       <div>
         <div class="label" id="cohort-name">Upcoming cohort</div>
         <div class="date" id="cohort-date">Date announced in the WhatsApp group</div>
-        <p class="note" id="cohort-note">Register now and join the WhatsApp group to receive the class date, time and joining link.</p>
+        <p class="note" id="cohort-note">Live online, 5:00–8:00 PM (WAT) on Tuesday 27 and Wednesday 28 October 2026. Special fee: ₦15,000.</p>
         <div class="countdown" id="countdown" hidden aria-live="polite">
           <div><b data-u="d">0</b><span>Days</span></div><div><b data-u="h">0</b><span>Hours</span></div><div><b data-u="m">0</b><span>Mins</span></div>
         </div>
       </div>
-      <a class="btn btn-gold" href="#register" data-cta="cohort">Reserve my seat</a>
+      <a class="btn btn-gold" href="#register" data-cta="cohort">Secure my seat</a>
     </div>
   </div>
 </section>
@@ -221,54 +221,86 @@
   </div>
 </section>
 
-<!-- REGISTER -->
+<!-- REGISTER / ENROL -->
 <section class="register" id="register" aria-labelledby="reg-title">
   <div class="wrap">
     <div class="reg-grid">
       <div class="reg-side">
-        <span class="kicker" style="color:var(--gold)">Registration</span>
-        <h2 id="reg-title">Reserve your seat</h2>
-        <p class="lead">Fill the short form. You'll be taken straight to our WhatsApp group, where the class date, fee and joining link are shared.</p>
-        <ul>
-          <li><svg><use href="#i-tick"/></svg>Takes less than a minute</li>
-          <li><svg><use href="#i-tick"/></svg>Early bird: first 15 participants get 6 months FREE Google Gemini AI + Google One storage credit</li>
-          <li><svg><use href="#i-tick"/></svg>Your details are used only to contact you about this training</li>
-        </ul>
-        <div class="qr-box"><img src="/assets/img/whatsapp-qr.png" alt="QR code to join the WhatsApp group" width="104" height="104"><p>Prefer to scan? Point your phone camera here to join the WhatsApp group directly.</p></div>
+        <span class="kicker" style="color:var(--gold)">Enrollment · Cohort 1</span>
+        <h2 id="reg-title">Secure your seat</h2>
+        <p class="lead">Live online class · <b style="color:#fff">Tuesday 27 &amp; Wednesday 28 October 2026</b> · 5:00–8:00 PM (WAT) daily.</p>
+        <div class="price-card">
+          <span class="was">₦50,000</span>
+          <span class="now">₦15,000</span>
+          <span class="note">Special launch fee — both sessions, manual, 200 Street Prompts, 30-day challenge and certificate.</span>
+        </div>
+        <div class="bank-card">
+          <h3>Pay by bank transfer</h3>
+          <dl>
+            <div><dt>Account name</dt><dd id="acct-name">Christopher Ohirein</dd></div>
+            <div><dt>Bank</dt><dd>Opay Digital MFB</dd></div>
+            <div><dt>Account number</dt><dd><span id="acct-no">7039106808</span> <button type="button" class="copy" data-copy="7039106808" aria-label="Copy account number">Copy</button></dd></div>
+            <div><dt>Amount</dt><dd>₦15,000</dd></div>
+          </dl>
+          <p class="small">Payments are received by our Director of Studies, Christopher Ohirein, on behalf of Royalstars Technologies Ltd.</p>
+        </div>
+        <ol class="enrol-steps">
+          <li><b>Transfer ₦15,000</b> to the account above.</li>
+          <li><b>Fill the enrollment form</b> and add your payment receipt.</li>
+          <li><b>We confirm your payment</b> and send your class link to your WhatsApp.</li>
+        </ol>
+        <p class="eb-line">🎁 <b>Early bird:</b> the first 15 confirmed participants get 6 months FREE Google Gemini AI + Google One storage credit.</p>
       </div>
 
       <div class="form-card">
-        <form name="registration" method="POST" action="/thank-you/" data-netlify="true" netlify-honeypot="bot-field" id="reg-form" novalidate>
-          <input type="hidden" name="form-name" value="registration">
-          <input type="hidden" name="cohort" id="f-cohort" value="">
+        <form name="enrollment" method="POST" action="/thank-you/" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data" id="reg-form" novalidate>
+          <input type="hidden" name="form-name" value="enrollment">
+          <input type="hidden" name="cohort" id="f-cohort" value="Cohort 1 — October 2026">
           <p class="sr"><label>Leave this empty: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
-          <h3>Registration form</h3>
-          <p class="hint">Fields marked optional can be skipped.</p>
+          <h3>Enrollment form</h3>
+          <p class="hint">Make your transfer first, then fill this form. Fields marked optional can be skipped.</p>
+
+          <p class="form-sec">Your details</p>
           <div class="field" data-f="full_name"><label for="f-name">Full name</label><input id="f-name" name="full_name" autocomplete="name" required maxlength="80"><span class="err">Please enter your full name.</span></div>
           <div class="grid2">
-            <div class="field" data-f="phone"><label for="f-phone">WhatsApp number</label><input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="e.g. 0803 123 4567" required maxlength="20"><span class="err">Enter a valid phone number.</span></div>
+            <div class="field" data-f="phone"><label for="f-phone">WhatsApp number</label><input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="e.g. 0803 123 4567" required maxlength="20"><span class="err">Enter a valid WhatsApp number.</span></div>
             <div class="field" data-f="email"><label for="f-email">Email <span class="opt">(optional)</span></label><input id="f-email" name="email" type="email" autocomplete="email" maxlength="100"><span class="err">Enter a valid email or leave it empty.</span></div>
           </div>
           <div class="grid2">
-            <div class="field" data-f="business_name"><label for="f-biz">Business name <span class="opt">(optional)</span></label><input id="f-biz" name="business_name" autocomplete="organization" maxlength="100"></div>
-            <div class="field" data-f="business_type"><label for="f-type">Type of business</label>
-              <select id="f-type" name="business_type" required><option value="">Choose one</option><option>Boutique / fashion</option><option>Salon / beauty / cosmetics</option><option>Food / catering</option><option>Online / WhatsApp seller</option><option>Services (tailoring, cleaning, etc.)</option><option>Retail shop</option><option>Student / school leaver</option><option>Starting a business soon</option><option>Other</option></select><span class="err">Please choose one.</span></div>
+            <div class="field" data-f="participant_type"><label for="f-ptype">I am…</label>
+              <select id="f-ptype" name="participant_type" required><option value="">Choose one</option><option>Running a business</option><option>Starting out (student / graduate / NYSC / job seeker)</option></select><span class="err">Please choose one.</span></div>
+            <div class="field" data-f="business_type"><label for="f-type">Business or idea</label>
+              <select id="f-type" name="business_type" required><option value="">Choose one</option><option>Fashion / boutique</option><option>Salon / beauty / cosmetics</option><option>Food / catering</option><option>Online / WhatsApp seller</option><option>Services / artisan</option><option>Retail shop</option><option>Still looking for an idea</option><option>Other</option></select><span class="err">Please choose one.</span></div>
           </div>
           <div class="grid2">
+            <div class="field" data-f="business_name"><label for="f-biz">Business name <span class="opt">(optional)</span></label><input id="f-biz" name="business_name" autocomplete="organization" maxlength="100"></div>
             <div class="field" data-f="location"><label for="f-loc">City / State</label><input id="f-loc" name="location" autocomplete="address-level2" placeholder="e.g. Abuja" required maxlength="60"><span class="err">Please enter your city or state.</span></div>
-            <div class="field" data-f="heard_from"><label for="f-heard">Heard about us via <span class="opt">(optional)</span></label>
-              <select id="f-heard" name="heard_from"><option value="">Choose one</option><option>WhatsApp</option><option>Facebook</option><option>Instagram</option><option>TikTok</option><option>Friend / referral</option><option>Flier</option><option>Other</option></select></div>
           </div>
+
+          <p class="form-sec">Payment details</p>
+          <div class="grid2">
+            <div class="field" data-f="sender_name"><label for="f-sender">Name on the account you paid from</label><input id="f-sender" name="sender_name" required maxlength="80"><span class="err">This helps us find your transfer.</span></div>
+            <div class="field" data-f="amount_paid"><label for="f-amount">Amount paid (₦)</label><input id="f-amount" name="amount_paid" type="number" inputmode="numeric" min="1" value="15000" required><span class="err">Enter the amount you paid.</span></div>
+          </div>
+          <div class="grid2">
+            <div class="field" data-f="payment_date"><label for="f-pdate">Date of transfer</label><input id="f-pdate" name="payment_date" type="date" required><span class="err">Choose the date you paid.</span></div>
+            <div class="field" data-f="payment_ref"><label for="f-ref">Transaction reference <span class="opt">(optional)</span></label><input id="f-ref" name="payment_ref" maxlength="60"></div>
+          </div>
+          <div class="field" data-f="proof"><label for="f-proof">Payment receipt or screenshot <span class="opt">(optional — image or PDF)</span></label><input id="f-proof" name="proof" type="file" accept="image/*,application/pdf"><span class="err">Please use an image, or a PDF under 3MB.</span></div>
+          <div class="field" data-f="heard_from"><label for="f-heard">Heard about us via <span class="opt">(optional)</span></label>
+            <select id="f-heard" name="heard_from"><option value="">Choose one</option><option>WhatsApp</option><option>Facebook</option><option>Instagram</option><option>TikTok</option><option>Friend / referral</option><option>Flier</option><option>Other</option></select></div>
+          <label class="consent"><input type="checkbox" name="paid_confirm" value="yes" id="f-paid" required><span>I have transferred the fee to the account shown on this page.</span></label>
           <label class="consent"><input type="checkbox" name="consent" value="yes" id="f-consent" required><span>I agree that Royalstars Technologies Ltd. may contact me by WhatsApp, phone or email about this training. See our <a href="/privacy/">privacy notice</a>.</span></label>
-          <button class="btn btn-gold" type="submit" id="f-submit">Register &amp; join WhatsApp group</button>
+          <button class="btn btn-gold" type="submit" id="f-submit">Submit my enrollment</button>
           <p class="form-msg" id="f-msg" role="alert"></p>
         </form>
         <div class="success" id="reg-success" aria-live="polite">
           <div class="tick"><svg><use href="#i-tick"/></svg></div>
-          <h3>You're registered!</h3>
-          <p>One last step: join our WhatsApp group to get the class date, fee and joining link.</p>
-          <a class="btn btn-wa js-wa" href="#" target="_blank" rel="noopener" data-cta="success-wa"><svg><use href="#i-wa"/></svg>Join the WhatsApp group</a>
-          <small id="wa-auto">Opening WhatsApp for you…</small>
+          <h3>Enrollment received!</h3>
+          <p>Thank you, <b id="s-name"></b>. We will confirm your payment and send your class link to your WhatsApp before the class starts on 27 October.</p>
+          <a class="btn btn-wa" id="s-receipt" href="#" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg>Send my receipt on WhatsApp</a>
+          <small>Sending your receipt on WhatsApp helps us confirm you faster.</small>
+          <a class="btn btn-plain js-wa" href="#" target="_blank" rel="noopener" style="margin-top:14px">Join our community group</a>
         </div>
       </div>
     </div>
@@ -286,7 +318,8 @@
       <details><summary>Do I need a laptop?</summary><p>No. A smartphone is enough. A laptop helps for the Sharp Lane record sheets, but it's optional.</p></details>
       <details><summary>Where does the class hold?</summary><p>Online, live on Zoom or Google Meet. Materials, recordings and the 30-Day Challenge run in our class Telegram group. You'll get the joining link in the WhatsApp group.</p></details>
       <details><summary>Do I need to pay for AI tools?</summary><p>No. Everything works with free versions of Meta AI, ChatGPT and Google Gemini. No dollar card needed.</p></details>
-      <details><summary>How much is the training and when is the next class?</summary><p>The fee and class dates are shared in our WhatsApp group. Register and join the group to receive them first — early registrants also get the early-bird bonus.</p></details>
+      <details><summary>How much is the training and when is the class?</summary><p>The special launch fee is ₦15,000 (normally ₦50,000). Cohort 1 holds live online on Tuesday 27 and Wednesday 28 October 2026, 5:00–8:00 PM (WAT) daily.</p></details>
+      <details><summary>How do I pay and get my class link?</summary><p>Transfer ₦15,000 to the account shown in the enrollment section, then fill the enrollment form with your payment details. We confirm every payment manually and send your Google Meet or Telegram link to your WhatsApp.</p></details>
       <details><summary>Will I get a certificate?</summary><p>Yes. Everyone who attends both sessions gets a Certificate of Participation. Participants who complete the 30-Day Smart Sales Challenge can earn the Certified AI Customer Growth Practitioner certificate. All certificates can be verified on this website.</p></details>
     </div>
   </div>
@@ -297,7 +330,7 @@
   <div class="wrap">
     <div class="final-card reveal">
       <div><h2>Your phone can be your sales assistant. <span>Learn how.</span></h2><p>Join the next live class and start making smart sales with AI.</p></div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn btn-gold" href="#register" data-cta="final">Register now</a><a class="btn btn-wa js-wa" href="#" target="_blank" rel="noopener" data-cta="final-wa"><svg><use href="#i-wa"/></svg>WhatsApp group</a></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn btn-gold" href="#register" data-cta="final">Enrol now</a><a class="btn btn-wa js-wa" href="#" target="_blank" rel="noopener" data-cta="final-wa"><svg><use href="#i-wa"/></svg>WhatsApp group</a></div>
     </div>
   </div>
 </section>
@@ -316,7 +349,7 @@
         <li><a class="js-mail" href="mailto:infoatroyalstars@gmail.com">infoatroyalstars@gmail.com</a></li>
         <li class="js-loc">Abuja, Nigeria</li></ul></div>
       <div><h4>Links</h4><ul>
-        <li><a href="#register">Register</a></li><li><a href="/verify/">Verify a certificate</a></li><li><a href="/privacy/">Privacy notice</a></li><li><a class="js-wa" href="#" target="_blank" rel="noopener">WhatsApp group</a></li></ul></div>
+        <li><a href="#register">Enrol</a></li><li><a href="/verify/">Verify a certificate</a></li><li><a href="/privacy/">Privacy notice</a></li><li><a class="js-wa" href="#" target="_blank" rel="noopener">WhatsApp group</a></li></ul></div>
     </div>
     <div class="foot-bottom"><span>© <span id="yr">2026</span> Royalstars Technologies Ltd. All rights reserved.</span><span>Abuja, Nigeria</span></div>
   </div>

@@ -39,6 +39,10 @@ th,td{text-align:left;padding:10px 12px;border-bottom:1px solid #EDF0F8;vertical
 th{background:var(--ice);color:var(--navy2);font-weight:700;position:sticky;top:0;white-space:nowrap}
 tr:last-child td{border-bottom:0}
 .tagb{display:inline-block;font-size:11px;font-weight:800;background:var(--gold);color:var(--navy);border-radius:6px;padding:2px 7px}
+.st-pending{display:inline-block;font-size:11px;font-weight:800;background:#FFF6D6;color:#8A6100;border-radius:6px;padding:2px 7px}
+.st-confirmed{display:inline-block;font-size:11px;font-weight:800;background:#EAF7EF;color:#17733A;border-radius:6px;padding:2px 7px}
+.st-rejected{display:inline-block;font-size:11px;font-weight:800;background:#FDECEC;color:#E5484D;border-radius:6px;padding:2px 7px}
+.acts{display:flex;gap:6px;flex-wrap:wrap}.acts .sbtn{padding:6px 10px;font-size:12.5px}
 .tagp{display:inline-block;font-size:11px;font-weight:700;background:var(--ice);color:var(--royal);border-radius:6px;padding:2px 7px}
 .empty{padding:30px;text-align:center;color:var(--muted)}
 .note{background:#FFF6D6;border-radius:12px;padding:12px 14px;font-size:14px;color:var(--navy2);margin-bottom:14px}
@@ -66,7 +70,7 @@ textarea{font:inherit;font-size:14px;border:1.5px solid var(--line);border-radiu
   <!-- APP -->
   <div id="app" hidden>
     <div class="tabs" role="tablist">
-      <button role="tab" aria-selected="true" data-tab="reg">Registrations</button>
+      <button role="tab" aria-selected="true" data-tab="reg">Enrollments</button>
       <button role="tab" aria-selected="false" data-tab="cohort">Cohort settings</button>
       <button role="tab" aria-selected="false" data-tab="certs">Certificates</button>
     </div>
@@ -76,16 +80,18 @@ textarea{font:inherit;font-size:14px;border:1.5px solid var(--line);border-radiu
     <section data-panel="reg" style="padding:0">
       <div class="stats" id="stats"></div>
       <div class="card">
-        <h2>Registrations</h2>
-        <p class="sub">Every form submission from the landing page. <span class="tagb">EARLY BIRD</span> marks the first 15 per cohort.</p>
+        <h2>Enrollments</h2>
+        <p class="sub">Check each transfer in your bank app, then click <b>Confirm</b>. <b>Send link</b> opens WhatsApp with the class link ready to send. <span class="tagb">EARLY BIRD</span> marks the first 15 confirmed per cohort.</p>
         <div class="toolbar">
           <input class="grow" id="q" placeholder="Search name, phone, business, city…">
+          <select id="fsrc"><option value="enrollment">Paid enrollments</option><option value="registration">Old interest list</option></select>
+          <select id="fstat"><option value="">All payments</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="rejected">Rejected</option></select>
           <select id="fc"><option value="">All cohorts</option></select>
           <button class="sbtn light" id="reload" type="button">Refresh</button>
           <button class="sbtn light" id="csv" type="button">Download CSV</button>
           <button class="sbtn gold" id="issue" type="button" disabled>Issue participation certificates (0)</button>
         </div>
-        <div class="tbl"><table><thead><tr><th><input type="checkbox" id="all" aria-label="Select all"></th><th>Date</th><th>Name</th><th>WhatsApp</th><th>Email</th><th>Business</th><th>Type</th><th>City</th><th>Heard from</th><th>Cohort</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+        <div class="tbl"><table><thead><tr><th><input type="checkbox" id="all" aria-label="Select all"></th><th>Date</th><th>Name</th><th>WhatsApp</th><th>Payment</th><th>Paid from · amount · date</th><th>Receipt</th><th>About</th><th>City</th><th>Actions</th></tr></thead><tbody id="rows"></tbody></table></div>
       </div>
     </section>
 
@@ -93,7 +99,7 @@ textarea{font:inherit;font-size:14px;border:1.5px solid var(--line);border-radiu
     <section data-panel="cohort" hidden style="padding:0">
       <form class="card" id="cohort-form">
         <h2>Cohort settings</h2>
-        <p class="sub">Shown on the landing page immediately — no redeploy needed. New registrations are tagged with the cohort name.</p>
+        <p class="sub">Shown on the landing page immediately — no redeploy needed. New enrollments are tagged with the cohort name.</p>
         <div class="row2">
           <div class="field"><label for="s-name">Cohort name</label><input id="s-name" name="cohort_name" placeholder="e.g. Cohort 3 — November 2026" maxlength="200"></div>
           <div class="field"><label for="s-start">Class start (Lagos time)</label><input id="s-start" type="datetime-local"></div>
@@ -101,6 +107,10 @@ textarea{font:inherit;font-size:14px;border:1.5px solid var(--line);border-radiu
         <div class="field"><label for="s-wa">WhatsApp group link for this cohort</label><input id="s-wa" name="whatsapp_group" placeholder="https://chat.whatsapp.com/…" maxlength="200"></div>
         <div class="field"><label for="s-note">Note under the date <span class="opt">(optional)</span></label><input id="s-note" name="cohort_note" placeholder="e.g. Classes hold 10am–1pm on Tuesday and Wednesday." maxlength="300"></div>
         <div class="note">Leave the date empty to show "Date announced in the WhatsApp group". Past dates are hidden automatically.</div>
+        <h3 style="margin:18px 0 8px;color:var(--navy2)">Private — for confirmed participants only</h3>
+        <div class="field"><label for="s-join">Class link (Google Meet or Telegram)</label><input id="s-join" placeholder="https://meet.google.com/… or https://t.me/…" maxlength="300"></div>
+        <div class="field"><label for="s-jmsg">Message sent with the link <span class="opt">(optional — {name} and {link} are filled in for you)</span></label><textarea id="s-jmsg" maxlength="800" rows="8" style="min-height:190px"></textarea></div>
+        <div class="note">This link is never shown on the public website. It is only used by the <b>Send link</b> button on confirmed enrollments.</div>
         <button class="sbtn" type="submit">Save settings</button>
       </form>
     </section>

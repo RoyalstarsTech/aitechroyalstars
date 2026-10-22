@@ -48,59 +48,95 @@
     };
   });
 
-  // ---- registrations ----
+  // ---- enrollments ----
+  var src = 'enrollment', joinLink = '', joinMsg = '';
+  var DEFAULT_MSG = 'Hello {name}, your payment for Grow Your Sales with AI Skills has been confirmed. Welcome to Cohort 1! 🎉\n\nClass link: {link}\n\nClasses hold Tuesday 27 and Wednesday 28 October 2026, 5:00–8:00 PM (WAT). Please join 10 minutes early with your phone charged and an AI app ready (Meta AI, ChatGPT or Gemini).\n\nRoyalstars Technologies Ltd.';
   function loadRegs() {
-    $('rows').replaceChildren(rowMsg('Loading…', 11));
-    api('registrations').then(function (d) {
+    $('rows').replaceChildren(rowMsg('Loading…', 10));
+    api('registrations?form=' + src).then(function (d) {
       regs = (d.items || []).sort(function (a, b) { return String(a.created_at).localeCompare(String(b.created_at)); });
-      var count = {};
-      regs.forEach(function (r) { var k = r.cohort || '(no cohort)'; count[k] = (count[k] || 0) + 1; r._early = count[k] <= 15; });
+      var count = {}, conf = {};
+      regs.forEach(function (r) {
+        var k = r.cohort || '(no cohort)'; count[k] = (count[k] || 0) + 1;
+        if (src === 'enrollment') { if (r.payment_status === 'confirmed') { conf[k] = (conf[k] || 0) + 1; r._early = conf[k] <= 15; } }
+        else r._early = count[k] <= 15;
+      });
       var fc = $('fc'), cur = fc.value; fc.replaceChildren(el('option', 'All cohorts'));
       fc.firstChild.value = '';
       Object.keys(count).forEach(function (k) { var o = el('option', k + ' (' + count[k] + ')'); o.value = k; fc.appendChild(o); });
       fc.value = cur; renderRegs(); renderStats(count);
-    }).catch(function (e) { $('rows').replaceChildren(rowMsg(e.message, 11)); });
+    }).catch(function (e) { $('rows').replaceChildren(rowMsg(e.message, 10)); });
   }
   function rowMsg(t, n) { var tr = el('tr'), td = el('td', t, 'empty'); td.colSpan = n; tr.appendChild(td); return tr; }
+  function naira(n) { n = Number(n) || 0; return '₦' + n.toLocaleString('en-NG'); }
   function renderStats(count) {
-    var today = new Date().toDateString(), week = Date.now() - 7 * 864e5;
-    var s = [[regs.length, 'Total registrations'], [regs.filter(function (r) { return new Date(r.created_at).toDateString() === today; }).length, 'Today'],
-      [regs.filter(function (r) { return new Date(r.created_at) > week; }).length, 'Last 7 days'], [Object.keys(count).length, 'Cohorts']];
+    var s;
+    if (src === 'enrollment') {
+      var c = regs.filter(function (r) { return r.payment_status === 'confirmed'; });
+      var total = c.reduce(function (a, r) { return a + (Number(r.amount_paid) || 0); }, 0);
+      s = [[regs.length, 'Enrollments submitted'], [regs.filter(function (r) { return r.payment_status === 'pending'; }).length, 'Waiting for confirmation'], [c.length, 'Confirmed participants'], [naira(total), 'Confirmed payments']];
+    } else {
+      var today = new Date().toDateString(), week = Date.now() - 7 * 864e5;
+      s = [[regs.length, 'Total registrations'], [regs.filter(function (r) { return new Date(r.created_at).toDateString() === today; }).length, 'Today'], [regs.filter(function (r) { return new Date(r.created_at) > week; }).length, 'Last 7 days'], [Object.keys(count).length, 'Cohorts']];
+    }
     $('stats').replaceChildren.apply($('stats'), s.map(function (x) { var d = el('div', null, 'stat'); d.appendChild(el('b', String(x[0]))); d.appendChild(el('span', x[1])); return d; }));
   }
   function filtered() {
-    var q = $('q').value.toLowerCase().trim(), c = $('fc').value;
+    var q = $('q').value.toLowerCase().trim(), c = $('fc').value, st = $('fstat').value;
     return regs.slice().reverse().filter(function (r) {
       if (c && (r.cohort || '(no cohort)') !== c) return false;
+      if (st && src === 'enrollment' && r.payment_status !== st) return false;
       if (!q) return true;
-      return [r.full_name, r.phone, r.email, r.business_name, r.location, r.business_type].join(' ').toLowerCase().indexOf(q) > -1;
+      return [r.full_name, r.phone, r.email, r.business_name, r.location, r.business_type, r.sender_name, r.payment_ref].join(' ').toLowerCase().indexOf(q) > -1;
     });
   }
-  function waLink(phone) { var d = String(phone || '').replace(/\D/g, ''); if (d.startsWith('0')) d = '234' + d.slice(1); return d.length >= 10 ? 'https://wa.me/' + d : null; }
+  function intl(phone) { var d = String(phone || '').replace(/\D/g, ''); if (d.startsWith('0')) d = '234' + d.slice(1); return d.length >= 10 ? d : ''; }
+  function setStatus(r, status) {
+    api('payments', { method: 'POST', body: { id: r.id, status: status } }).then(function () { flash('ok', r.full_name + ' marked as ' + status + '.'); loadRegs(); }).catch(fail);
+  }
+  function sendLink(r) {
+    if (!joinLink) { flash('err', 'Add the class link in Cohort settings first.'); return; }
+    var first = String(r.full_name || '').split(' ')[0];
+    var text = (joinMsg || DEFAULT_MSG).replace(/\{name\}/g, first).replace(/\{link\}/g, joinLink);
+    var n = intl(r.phone); if (!n) { flash('err', 'This phone number looks invalid.'); return; }
+    window.open('https://wa.me/' + n + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
+  }
   function renderRegs() {
     var list = filtered(), body = $('rows');
-    if (!list.length) { body.replaceChildren(rowMsg(regs.length ? 'No matches.' : 'No registrations yet.', 11)); return; }
+    if (!list.length) { body.replaceChildren(rowMsg(regs.length ? 'No matches.' : 'Nothing yet.', 10)); return; }
     body.replaceChildren.apply(body, list.map(function (r) {
       var tr = el('tr');
       var cb = el('input'); cb.type = 'checkbox'; cb.checked = selected.has(r.id); cb.onchange = function () { cb.checked ? selected.add(r.id) : selected.delete(r.id); updIssue(); };
       var td0 = el('td'); td0.appendChild(cb); tr.appendChild(td0);
       tr.appendChild(el('td', fmtDate(r.created_at)));
-      var tdn = el('td'); tdn.appendChild(el('strong', r.full_name || '')); if (r._early) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('span', 'EARLY BIRD', 'tagb')); } tr.appendChild(tdn);
-      var tdp = el('td'); var w = waLink(r.phone); if (w) { var a = el('a', r.phone); a.href = w; a.target = '_blank'; a.rel = 'noopener'; tdp.appendChild(a); } else tdp.textContent = r.phone || ''; tr.appendChild(tdp);
-      [r.email, r.business_name, r.business_type, r.location, r.heard_from, r.cohort].forEach(function (v) { tr.appendChild(el('td', v || '')); });
-      var tdx = el('td'), del = el('button', 'Delete', 'sbtn danger'); del.type = 'button';
-      del.onclick = function () { if (!confirm('Delete this registration permanently? Use this only for spam or duplicates.')) return; api('registrations?id=' + encodeURIComponent(r.id), { method: 'DELETE' }).then(function () { flash('ok', 'Registration deleted.'); loadRegs(); }).catch(fail); };
-      tdx.appendChild(del); tr.appendChild(tdx);
+      var tdn = el('td'); tdn.appendChild(el('strong', r.full_name || '')); if (r.email) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('small', r.email)); }
+      if (r._early) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('span', 'EARLY BIRD', 'tagb')); } tr.appendChild(tdn);
+      var tdp = el('td'); var n = intl(r.phone); if (n) { var a = el('a', r.phone); a.href = 'https://wa.me/' + n; a.target = '_blank'; a.rel = 'noopener'; tdp.appendChild(a); } else tdp.textContent = r.phone || ''; tr.appendChild(tdp);
+      var tds = el('td'); if (src === 'enrollment') tds.appendChild(el('span', r.payment_status, 'st-' + r.payment_status)); else tds.textContent = '—'; tr.appendChild(tds);
+      var tdpay = el('td'); if (src === 'enrollment') { tdpay.appendChild(el('div', r.sender_name || '')); tdpay.appendChild(el('small', naira(r.amount_paid) + ' · ' + (r.payment_date || '') + (r.payment_ref ? ' · ref ' + r.payment_ref : ''))); } tr.appendChild(tdpay);
+      var tdr = el('td'); if (r.proof_url) { var ra = el('a', 'View'); ra.href = r.proof_url; ra.target = '_blank'; ra.rel = 'noopener'; tdr.appendChild(ra); } else tdr.appendChild(el('small', src === 'enrollment' ? 'none — check WhatsApp' : '')); tr.appendChild(tdr);
+      var tda = el('td'); tda.appendChild(el('div', r.participant_type || '')); tda.appendChild(el('small', [r.business_type, r.business_name].filter(Boolean).join(' · '))); tr.appendChild(tda);
+      tr.appendChild(el('td', r.location || ''));
+      var tdx = el('td'), acts = el('div', null, 'acts');
+      if (src === 'enrollment') {
+        if (r.payment_status !== 'confirmed') { var c = el('button', 'Confirm', 'sbtn'); c.type = 'button'; c.onclick = function () { if (confirm('Have you seen ' + naira(r.amount_paid) + ' from "' + r.sender_name + '" in your bank app?')) setStatus(r, 'confirmed'); }; acts.appendChild(c); }
+        if (r.payment_status === 'confirmed') { var sl = el('button', 'Send link', 'sbtn gold'); sl.type = 'button'; sl.onclick = function () { sendLink(r); }; acts.appendChild(sl); }
+        if (r.payment_status !== 'rejected') { var rj = el('button', r.payment_status === 'confirmed' ? 'Undo' : 'Reject', 'sbtn light'); rj.type = 'button'; rj.onclick = function () { if (confirm('Mark as ' + (r.payment_status === 'confirmed' ? 'pending' : 'rejected') + '?')) setStatus(r, r.payment_status === 'confirmed' ? 'pending' : 'rejected'); }; acts.appendChild(rj); }
+      }
+      var del = el('button', 'Delete', 'sbtn danger'); del.type = 'button';
+      del.onclick = function () { if (!confirm('Delete this entry permanently? Use this only for spam or duplicates.')) return; api('registrations?id=' + encodeURIComponent(r.id), { method: 'DELETE' }).then(function () { flash('ok', 'Deleted.'); loadRegs(); }).catch(fail); };
+      acts.appendChild(del); tdx.appendChild(acts); tr.appendChild(tdx);
       return tr;
     }));
   }
   function updIssue() { $('issue').disabled = !selected.size; $('issue').textContent = 'Issue participation certificates (' + selected.size + ')'; }
-  $('q').oninput = renderRegs; $('fc').onchange = renderRegs; $('reload').onclick = loadRegs;
+  $('q').oninput = renderRegs; $('fc').onchange = renderRegs; $('fstat').onchange = renderRegs; $('reload').onclick = loadRegs;
+  $('fsrc').onchange = function () { src = $('fsrc').value; selected.clear(); updIssue(); loadRegs(); };
   $('all').onchange = function () { filtered().forEach(function (r) { $('all').checked ? selected.add(r.id) : selected.delete(r.id); }); renderRegs(); updIssue(); };
   $('csv').onclick = function () {
-    csv([['Date', 'Name', 'WhatsApp', 'Email', 'Business', 'Type', 'City', 'Heard from', 'Cohort', 'Early bird']].concat(filtered().map(function (r) {
-      return [fmtDate(r.created_at), r.full_name, r.phone, r.email, r.business_name, r.business_type, r.location, r.heard_from, r.cohort, r._early ? 'Yes' : ''];
-    })), 'registrations.csv');
+    csv([['Date', 'Name', 'WhatsApp', 'Email', 'Payment status', 'Paid from', 'Amount', 'Payment date', 'Reference', 'Receipt', 'I am', 'Business/idea', 'Business name', 'City', 'Heard from', 'Cohort', 'Early bird']].concat(filtered().map(function (r) {
+      return [fmtDate(r.created_at), r.full_name, r.phone, r.email, r.payment_status, r.sender_name, r.amount_paid, r.payment_date, r.payment_ref, r.proof_url, r.participant_type, r.business_type, r.business_name, r.location, r.heard_from, r.cohort, r._early ? 'Yes' : ''];
+    })), src + '.csv');
   };
   $('issue').onclick = function () {
     var items = regs.filter(function (r) { return selected.has(r.id); }).map(function (r) { return { name: r.full_name, type: 'participation', cohort: r.cohort || '' }; });
@@ -111,13 +147,13 @@
   // ---- settings ----
   function toLocalInput(iso) { if (!iso) return ''; var d = new Date(iso); if (isNaN(d)) return ''; var l = new Date(d.getTime() + 60 * 60000); return l.toISOString().slice(0, 16); }
   function loadSettings() {
-    api('settings').then(function (s) { $('s-name').value = s.cohort_name || ''; $('s-start').value = toLocalInput(s.cohort_start); $('s-wa').value = s.whatsapp_group || ''; $('s-note').value = s.cohort_note || ''; }).catch(fail);
+    api('settings').then(function (s) { $('s-name').value = s.cohort_name || ''; $('s-start').value = toLocalInput(s.cohort_start); $('s-wa').value = s.whatsapp_group || ''; $('s-note').value = s.cohort_note || ''; joinLink = s.join_link || ''; joinMsg = s.join_message || ''; $('s-join').value = joinLink; $('s-jmsg').value = joinMsg || DEFAULT_MSG; }).catch(fail);
   }
   $('cohort-form').addEventListener('submit', function (e) {
     e.preventDefault();
     var v = $('s-start').value; // interpreted as Lagos time (UTC+1)
-    var body = { cohort_name: $('s-name').value, cohort_start: v ? v + ':00+01:00' : '', whatsapp_group: $('s-wa').value, cohort_note: $('s-note').value };
-    api('settings', { method: 'PUT', body: body }).then(function () { flash('ok', 'Saved. The landing page now shows these details.'); }).catch(fail);
+    var body = { cohort_name: $('s-name').value, cohort_start: v ? v + ':00+01:00' : '', whatsapp_group: $('s-wa').value, cohort_note: $('s-note').value, join_link: $('s-join').value.trim(), join_message: $('s-jmsg').value.trim() === DEFAULT_MSG ? '' : $('s-jmsg').value.trim() };
+    api('settings', { method: 'PUT', body: body }).then(function (r) { joinLink = r.join_link || ''; joinMsg = r.join_message || ''; flash('ok', 'Saved. The landing page now shows these details.'); }).catch(fail);
   });
 
   // ---- certificates ----

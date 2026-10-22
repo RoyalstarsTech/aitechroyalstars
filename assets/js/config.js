@@ -10,8 +10,8 @@ window.SITE_CONFIG = {
   META_PIXEL_ID: "",
 
   // Fallback cohort details (used if admin settings are not set).
-  COHORT_NAME: "",          // e.g. "Cohort 1"
-  COHORT_START: "",         // ISO date & time, e.g. "2026-11-03T10:00:00+01:00"
+  COHORT_NAME: "Cohort 1 — October 2026",
+  COHORT_START: "2026-10-27T17:00:00+01:00",  // ISO date & time (WAT = +01:00)
   WHATSAPP_GROUP: "https://chat.whatsapp.com/FfqzNhmpsktF5adKI3k0nI?s=cl&p=a&mlu=4&ilr=4",
 
   // Contact

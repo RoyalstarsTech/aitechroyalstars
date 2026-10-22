@@ -299,3 +299,25 @@ footer ul{list-style:none;display:grid;gap:8px}
 @media (max-width:900px){.builds.six{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:560px){.builds.six{grid-template-columns:1fr}}
 .hero h1 span{font-size:.82em}
+/* v4: paid enrollment */
+.price-card{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-top:22px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:18px 20px}
+.price-card .was{font-size:20px;color:#AFC0FF;text-decoration:line-through}
+.price-card .now{font-size:40px;font-weight:900;color:var(--gold);line-height:1}
+.price-card .note{flex-basis:100%;font-size:14px;color:#DCE4FF}
+.bank-card{margin-top:16px;background:#fff;color:var(--ink);border-radius:16px;padding:18px 20px}
+.bank-card h3{font-size:17px;color:var(--navy2);margin-bottom:10px}
+.bank-card dl{display:grid;gap:8px}
+.bank-card dl div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding-bottom:6px}
+.bank-card dt{color:var(--muted);font-size:14px}
+.bank-card dd{font-weight:700;color:var(--navy2);text-align:right}
+.bank-card .copy{font:inherit;font-size:12px;font-weight:700;border:0;border-radius:8px;background:var(--gold);color:var(--navy);padding:3px 9px;margin-left:6px;cursor:pointer}
+.bank-card .small{font-size:12.5px;color:var(--muted);margin-top:10px}
+.enrol-steps{margin:18px 0 0;padding:0;list-style:none;display:grid;gap:10px;color:#DCE4FF;counter-reset:st}
+.enrol-steps li{display:block;position:relative;padding-left:38px;line-height:1.5;counter-increment:st}
+.enrol-steps li::before{content:counter(st);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--gold,#FFC83D);color:#0B1B5C;font-weight:800;font-size:14px;display:grid;place-items:center}
+.enrol-steps b{color:#fff}
+.eb-line{margin-top:16px;font-size:14.5px;color:#DCE4FF}
+.eb-line b{color:var(--gold)}
+.form-sec{font-size:12.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--royal);margin:6px 0 10px;padding-top:6px;border-top:1px solid var(--line)}
+.field input[type=file]{padding:9px;font-size:14px}
+.success .btn-plain{display:inline-flex}
