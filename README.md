@@ -13,7 +13,7 @@ Landing page, registration, admin dashboard and certificate verification for
 | `/privacy/` | Privacy notice (Nigeria Data Protection Act, 2023) |
 | `/thank-you/` | Fallback page if JavaScript is off |
 | `assets/js/config.js` | **The one file you edit**: Google Analytics ID, Meta Pixel ID, contact details, social links |
-| `netlify/functions/` | Serverless backend (`/api/settings`, `/api/verify`, `/api/admin/*`) |
+| `netlify/functions/` | Serverless backend (`/api/settings`, `/api/stats`, `/api/verify`, `/api/admin/*`) |
 
 ## 1. Deploy (5 minutes)
 
@@ -63,6 +63,14 @@ Redeploy after adding variables.
 3. Found it → **Confirm**. Not found after a day → message them; if it never came → **Reject**.
 4. On a confirmed person, click **Send link**. WhatsApp opens with their name and your class link
    already typed. Just press send.
+
+5. If the person ticked 📣 (OK to welcome in group), click **Share to group**. WhatsApp opens with a
+   welcome message (first name, business type, city, number confirmed, early-bird spots left).
+   Choose your community group and send. Receipts and phone numbers are never shared.
+
+**Live counter:** the website shows "N participants confirmed · X of 15 early-bird spots left" near the price
+and in the early-bird band. It counts **confirmed** payments only and updates within about a minute of
+each Confirm. The participant number appears from 3 confirmed upward; the early-bird spots always show.
 
 Set the class link (Google Meet or Telegram) and the message once in **Cohort settings → Class link**.
 The class link is private: it is never shown on the public website.

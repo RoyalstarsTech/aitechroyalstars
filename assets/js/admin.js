@@ -92,7 +92,7 @@
   }
   function intl(phone) { var d = String(phone || '').replace(/\D/g, ''); if (d.startsWith('0')) d = '234' + d.slice(1); return d.length >= 10 ? d : ''; }
   function setStatus(r, status) {
-    api('payments', { method: 'POST', body: { id: r.id, status: status } }).then(function () { flash('ok', r.full_name + ' marked as ' + status + '.'); loadRegs(); }).catch(fail);
+    api('payments', { method: 'POST', body: { id: r.id, status: status, cohort: r.cohort || '' } }).then(function () { flash('ok', r.full_name + ' marked as ' + status + '.'); loadRegs(); }).catch(fail);
   }
   function sendLink(r) {
     if (!joinLink) { flash('err', 'Add the class link in Cohort settings first.'); return; }
@@ -100,6 +100,20 @@
     var text = (joinMsg || DEFAULT_MSG).replace(/\{name\}/g, first).replace(/\{link\}/g, joinLink);
     var n = intl(r.phone); if (!n) { flash('err', 'This phone number looks invalid.'); return; }
     window.open('https://wa.me/' + n + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
+  }
+  function siteUrl() { return location.origin + '/#register'; }
+  function shareToGroup(r) {
+    var k = r.cohort || '(no cohort)';
+    var confirmed = regs.filter(function (x) { return (x.cohort || '(no cohort)') === k && x.payment_status === 'confirmed'; }).length;
+    var left = Math.max(0, 15 - confirmed);
+    var first = String(r.full_name || '').trim().split(/\s+/)[0];
+    var about = [r.business_type, r.location].filter(Boolean).join(', ');
+    var text = '🎉 Please welcome *' + first + '*' + (about ? ' (' + about + ')' : '') + ', seat confirmed! ✅\n\n' +
+      confirmed + ' participant' + (confirmed === 1 ? '' : 's') + ' confirmed for *Grow Your Sales with AI Skills*' + (r.cohort ? ' (' + r.cohort + ')' : '') + '.\n' +
+      (left > 0 ? 'Only ' + left + ' early-bird spot' + (left === 1 ? '' : 's') + ' left: 6 months FREE Google Gemini AI + Google One storage. 🎁\n'
+                : 'Early-bird spots are all taken, but seats are still open.\n') +
+      '\nLive online: Tue 27 & Wed 28 Oct, 5–8 PM. Fee ₦15,000.\nEnrol here 👉 ' + siteUrl();
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
   }
   function renderRegs() {
     var list = filtered(), body = $('rows');
@@ -110,7 +124,8 @@
       var td0 = el('td'); td0.appendChild(cb); tr.appendChild(td0);
       tr.appendChild(el('td', fmtDate(r.created_at)));
       var tdn = el('td'); tdn.appendChild(el('strong', r.full_name || '')); if (r.email) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('small', r.email)); }
-      if (r._early) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('span', 'EARLY BIRD', 'tagb')); } tr.appendChild(tdn);
+      if (r._early) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('span', 'EARLY BIRD', 'tagb')); }
+      if (r.announce_ok) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('small', '📣 OK to welcome in group')); } tr.appendChild(tdn);
       var tdp = el('td'); var n = intl(r.phone); if (n) { var a = el('a', r.phone); a.href = 'https://wa.me/' + n; a.target = '_blank'; a.rel = 'noopener'; tdp.appendChild(a); } else tdp.textContent = r.phone || ''; tr.appendChild(tdp);
       var tds = el('td'); if (src === 'enrollment') tds.appendChild(el('span', r.payment_status, 'st-' + r.payment_status)); else tds.textContent = '—'; tr.appendChild(tds);
       var tdpay = el('td'); if (src === 'enrollment') { tdpay.appendChild(el('div', r.sender_name || '')); tdpay.appendChild(el('small', naira(r.amount_paid) + ' · ' + (r.payment_date || '') + (r.payment_ref ? ' · ref ' + r.payment_ref : ''))); } tr.appendChild(tdpay);
@@ -121,6 +136,8 @@
       if (src === 'enrollment') {
         if (r.payment_status !== 'confirmed') { var c = el('button', 'Confirm', 'sbtn'); c.type = 'button'; c.onclick = function () { if (confirm('Have you seen ' + naira(r.amount_paid) + ' from "' + r.sender_name + '" in your bank app?')) setStatus(r, 'confirmed'); }; acts.appendChild(c); }
         if (r.payment_status === 'confirmed') { var sl = el('button', 'Send link', 'sbtn gold'); sl.type = 'button'; sl.onclick = function () { sendLink(r); }; acts.appendChild(sl); }
+        if (r.payment_status === 'confirmed' && r.announce_ok) { var sg = el('button', 'Share to group', 'sbtn'); sg.type = 'button'; sg.title = 'Opens WhatsApp — choose your community group'; sg.onclick = function () { shareToGroup(r); }; acts.appendChild(sg); }
+        if (r.payment_status === 'confirmed' && !r.announce_ok) acts.appendChild(el('small', 'No group shout-out'));
         if (r.payment_status !== 'rejected') { var rj = el('button', r.payment_status === 'confirmed' ? 'Undo' : 'Reject', 'sbtn light'); rj.type = 'button'; rj.onclick = function () { if (confirm('Mark as ' + (r.payment_status === 'confirmed' ? 'pending' : 'rejected') + '?')) setStatus(r, r.payment_status === 'confirmed' ? 'pending' : 'rejected'); }; acts.appendChild(rj); }
       }
       var del = el('button', 'Delete', 'sbtn danger'); del.type = 'button';
@@ -134,8 +151,8 @@
   $('fsrc').onchange = function () { src = $('fsrc').value; selected.clear(); updIssue(); loadRegs(); };
   $('all').onchange = function () { filtered().forEach(function (r) { $('all').checked ? selected.add(r.id) : selected.delete(r.id); }); renderRegs(); updIssue(); };
   $('csv').onclick = function () {
-    csv([['Date', 'Name', 'WhatsApp', 'Email', 'Payment status', 'Paid from', 'Amount', 'Payment date', 'Reference', 'Receipt', 'I am', 'Business/idea', 'Business name', 'City', 'Heard from', 'Cohort', 'Early bird']].concat(filtered().map(function (r) {
-      return [fmtDate(r.created_at), r.full_name, r.phone, r.email, r.payment_status, r.sender_name, r.amount_paid, r.payment_date, r.payment_ref, r.proof_url, r.participant_type, r.business_type, r.business_name, r.location, r.heard_from, r.cohort, r._early ? 'Yes' : ''];
+    csv([['Date', 'Name', 'WhatsApp', 'Email', 'Payment status', 'Paid from', 'Amount', 'Payment date', 'Reference', 'Receipt', 'I am', 'Business/idea', 'Business name', 'City', 'Heard from', 'Cohort', 'Early bird', 'OK to welcome in group']].concat(filtered().map(function (r) {
+      return [fmtDate(r.created_at), r.full_name, r.phone, r.email, r.payment_status, r.sender_name, r.amount_paid, r.payment_date, r.payment_ref, r.proof_url, r.participant_type, r.business_type, r.business_name, r.location, r.heard_from, r.cohort, r._early ? 'Yes' : '', r.announce_ok ? 'Yes' : ''];
     })), src + '.csv');
   };
   $('issue').onclick = function () {

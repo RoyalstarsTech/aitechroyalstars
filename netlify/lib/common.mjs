@@ -6,6 +6,24 @@ export const json = (data, status = 200, extra = {}) =>
 
 export const siteStore = () => getStore({ name: 'site', consistency: 'strong' });
 export const certStore = () => getStore({ name: 'certificates', consistency: 'strong' });
+export const paymentStore = () => getStore({ name: 'payments', consistency: 'strong' });
+export const EARLY_BIRD_SEATS = 15;
+
+// Confirmed-participant counts per cohort, saved for the public counter.
+export async function saveStats(byCohort) {
+  await siteStore().setJSON('stats', { byCohort, at: new Date().toISOString() });
+}
+export async function recountStats() {
+  const store = paymentStore();
+  const { blobs } = await store.list();
+  const byCohort = {};
+  for (const b of blobs) {
+    const r = await store.get(b.key, { type: 'json' });
+    if (r && r.status === 'confirmed' && r.cohort) byCohort[r.cohort] = (byCohort[r.cohort] || 0) + 1;
+  }
+  await saveStats(byCohort);
+  return byCohort;
+}
 
 export const DEFAULT_SETTINGS = { cohort_name: '', cohort_start: '', whatsapp_group: '', cohort_note: '' };
 export async function readSettings() {

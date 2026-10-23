@@ -190,7 +190,7 @@
   <div class="wrap">
     <div class="eb-card reveal">
       <div class="eb-tag">EARLY<br>BIRD</div>
-      <p>The <b>first 15 confirmed paid participants</b> get <b>6 months FREE Google Gemini AI</b> + <b>Google One storage credit</b>.</p>
+      <p>The <b>first 15 confirmed paid participants</b> get <b>6 months FREE Google Gemini AI</b> + <b>Google One storage credit</b>.<span class="eb-left js-eb-left" hidden></span></p>
       <a class="btn btn-navy" href="#register" data-cta="earlybird">Enrol now</a>
     </div>
   </div>
@@ -233,6 +233,7 @@
           <span class="was">₦50,000</span>
           <span class="now">₦15,000</span>
           <span class="note">Special launch fee — both sessions, manual, 200 Street Prompts, 30-day challenge and certificate.</span>
+          <div class="seat-count" id="seat-count" hidden><span class="dot"></span><span id="seat-text"></span></div>
         </div>
         <div class="bank-card">
           <h3>Pay by bank transfer</h3>
@@ -290,6 +291,7 @@
           <div class="field" data-f="heard_from"><label for="f-heard">Heard about us via <span class="opt">(optional)</span></label>
             <select id="f-heard" name="heard_from"><option value="">Choose one</option><option>WhatsApp</option><option>Facebook</option><option>Instagram</option><option>TikTok</option><option>Friend / referral</option><option>Flier</option><option>Other</option></select></div>
           <label class="consent"><input type="checkbox" name="paid_confirm" value="yes" id="f-paid" required><span>I have transferred the fee to the account shown on this page.</span></label>
+          <label class="consent"><input type="checkbox" name="announce_ok" value="yes" id="f-announce"><span><b>Optional:</b> you may welcome me in the community group once my payment is confirmed (first name, business type and city only — never my receipt or number).</span></label>
           <label class="consent"><input type="checkbox" name="consent" value="yes" id="f-consent" required><span>I agree that Royalstars Technologies Ltd. may contact me by WhatsApp, phone or email about this training. See our <a href="/privacy/">privacy notice</a>.</span></label>
           <button class="btn btn-gold" type="submit" id="f-submit">Submit my enrollment</button>
           <p class="form-msg" id="f-msg" role="alert"></p>
@@ -300,6 +302,11 @@
           <p>Thank you, <b id="s-name"></b>. We will confirm your payment and send your class link to your WhatsApp before the class starts on 27 October.</p>
           <a class="btn btn-wa" id="s-receipt" href="#" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg>Send my receipt on WhatsApp</a>
           <small>Sending your receipt on WhatsApp helps us confirm you faster.</small>
+          <div class="share-box">
+            <b>Tell your friends you're in</b>
+            <span>Share on your WhatsApp Status or with a friend who sells.</span>
+            <a class="btn btn-navy" id="s-share" href="#" target="_blank" rel="noopener" data-cta="share_enrolled"><svg><use href="#i-wa"/></svg>Share the good news</a>
+          </div>
           <a class="btn btn-plain js-wa" href="#" target="_blank" rel="noopener" style="margin-top:14px">Join our community group</a>
         </div>
       </div>

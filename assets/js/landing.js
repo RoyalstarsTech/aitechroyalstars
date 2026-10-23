@@ -26,6 +26,24 @@
     }
   });
 
+  // ---- live seat counter (confirmed participants only) ----
+  window.siteSettings.then(function (S) {
+    var C = window.SITE_CONFIG || {};
+    var cohort = S.cohort_name || C.COHORT_NAME || '';
+    return fetch('/api/stats?cohort=' + encodeURIComponent(cohort)).then(function (r) { return r.json(); });
+  }).then(function (d) {
+    if (!d || typeof d.confirmed !== 'number') return;
+    var left = d.early_left, total = d.early_total || 15, parts = [];
+    if (d.confirmed >= 3) parts.push(d.confirmed + ' participants confirmed');
+    parts.push(left > 0 ? (left === 1 ? 'Only 1 early-bird spot left!' : 'Only ' + left + ' of ' + total + ' early-bird spots left') : 'Early-bird spots are all taken — seats still open');
+    document.getElementById('seat-text').textContent = parts.join(' · ');
+    document.getElementById('seat-count').hidden = false;
+    document.querySelectorAll('.js-eb-left').forEach(function (el) {
+      el.textContent = left > 0 ? '⏳ ' + left + ' of ' + total + ' early-bird spots left.' : 'All early-bird spots have been taken.';
+      el.hidden = false;
+    });
+  }).catch(function () {});
+
   // ---- copy buttons ----
   document.querySelectorAll('[data-copy]').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -95,6 +113,9 @@
           '\nPhone: ' + form.elements.phone.value.trim() + '\nAmount: ₦' + form.elements.amount_paid.value +
           '\nPaid from: ' + form.elements.sender_name.value.trim() + '\nDate: ' + form.elements.payment_date.value + '\nHere is my payment receipt:';
         document.getElementById('s-receipt').href = 'https://wa.me/' + (C.PHONE_INTL || '2347039106808') + '?text=' + encodeURIComponent(text);
+        var share = 'I just enrolled for *Grow Your Sales with AI Skills* by Royalstars Technologies 🚀\n\nLive online class: Tue 27 & Wed 28 October, 5–8 PM. You learn to use AI to find customers, sell more and keep proper records.\n\nIt is ₦15,000 now (normally ₦50,000), and the first 15 confirmed get 6 months FREE Google Gemini AI. Join me 👉 ' + location.origin + '/?ref=share#register';
+        var sh = document.getElementById('s-share');
+        if (sh) { sh.href = 'https://wa.me/?text=' + encodeURIComponent(share); sh.onclick = function () { window.track('share', { method: 'whatsapp', content_type: 'enrollment' }); }; }
         form.style.display = 'none';
         var ok = document.getElementById('reg-success'); ok.style.display = 'block';
         ok.scrollIntoView({ behavior: 'smooth', block: 'center' });

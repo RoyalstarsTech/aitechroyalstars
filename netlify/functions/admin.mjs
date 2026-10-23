@@ -1,7 +1,5 @@
 // Admin API (password protected): registrations, cohort settings, certificates
-import { json, siteStore, certStore, readSettings, DEFAULT_SETTINGS, normNo, randCode, issueToken, validToken, passwordOk } from '../lib/common.mjs';
-import { getStore } from '@netlify/blobs';
-const paymentStore = () => getStore({ name: 'payments', consistency: 'strong' });
+import { json, siteStore, certStore, paymentStore, saveStats, recountStats, readSettings, DEFAULT_SETTINGS, normNo, randCode, issueToken, validToken, passwordOk } from '../lib/common.mjs';
 
 const API = 'https://api.netlify.com/api/v1';
 const TYPES = { participation: 'Certificate of Participation', practitioner: 'Certified AI Customer Growth Practitioner' };
@@ -16,7 +14,7 @@ async function netlify(path, init = {}) {
 }
 
 const FIELDS = ['full_name', 'phone', 'email', 'participant_type', 'business_name', 'business_type', 'location', 'heard_from', 'cohort',
-  'sender_name', 'amount_paid', 'payment_date', 'payment_ref'];
+  'sender_name', 'amount_paid', 'payment_date', 'payment_ref', 'announce_ok'];
 const fileUrl = (v) => (v && typeof v === 'object' ? v.url : (typeof v === 'string' && /^https?:\/\//.test(v) ? v : '')) || '';
 async function registrations(siteId, formName) {
   const forms = await netlify(`/sites/${siteId}/forms`);
@@ -68,14 +66,22 @@ export default async (req, context) => {
 
     if (route === 'registrations' && method === 'GET') {
       const formName = url.searchParams.get('form') === 'registration' ? 'registration' : 'enrollment';
-      return json({ items: await registrations(siteId, formName) });
+      const items = await registrations(siteId, formName);
+      if (formName === 'enrollment') {
+        // keep the public "participants confirmed" counter in step with the real list
+        const byCohort = {};
+        for (const r of items) if (r.payment_status === 'confirmed') { const k = r.cohort || ''; byCohort[k] = (byCohort[k] || 0) + 1; }
+        await saveStats(byCohort).catch(() => {});
+      }
+      return json({ items });
     }
     if (route === 'payments' && method === 'POST') {
       const id = clean(body.id, 40);
       const status = ['pending', 'confirmed', 'rejected'].includes(body.status) ? body.status : null;
       if (!/^[a-f0-9]+$/i.test(id) || !status) return json({ error: 'Bad request' }, 400);
-      const rec = { status, at: new Date().toISOString() };
+      const rec = { status, at: new Date().toISOString(), cohort: clean(body.cohort, 120) };
       await paymentStore().setJSON(id, rec);
+      await recountStats().catch(() => {});
       return json(rec);
     }
     if (route === 'registrations' && method === 'DELETE') {
@@ -83,6 +89,7 @@ export default async (req, context) => {
       if (!/^[a-f0-9]+$/i.test(id)) return json({ error: 'Bad id' }, 400);
       await netlify(`/submissions/${id}`, { method: 'DELETE' });
       await paymentStore().delete(id).catch(() => {});
+      await recountStats().catch(() => {});
       return json({ ok: true });
     }
 
