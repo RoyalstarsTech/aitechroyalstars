@@ -4,6 +4,7 @@
   "type": "module",
   "description": "Landing page, registration, admin and certificate verification for Royalstars Technologies Ltd. — AI for Customer Growth",
   "dependencies": {
-    "@netlify/blobs": "^11.1.4"
+    "@netlify/blobs": "^11.1.4",
+    "pdf-lib": "^1.17.1"
   }
 }

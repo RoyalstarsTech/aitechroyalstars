@@ -6,6 +6,7 @@
 <title>Admin | Royalstars Grow Your Sales with AI Skills</title>
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/app.css">
 <style>
 body{background:#F4F6FC}
@@ -52,6 +53,53 @@ tr:last-child td{border-bottom:0}
 @media(max-width:720px){.row2{grid-template-columns:1fr}}
 textarea{font:inherit;font-size:14px;border:1.5px solid var(--line);border-radius:12px;padding:12px;width:100%;min-height:140px}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:13px}
+.sw{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--navy2);cursor:pointer}
+.sw input{width:20px;height:20px;accent-color:var(--royal)}
+.ck{display:grid;gap:8px;border:1px solid var(--line);border-radius:14px;padding:14px}
+.ck b{color:var(--navy2)}
+.ck input[maxlength]{font:inherit;font-size:15px;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;text-transform:uppercase}
+.bar{display:grid;grid-template-columns:170px 1fr;gap:10px;align-items:center;margin:8px 0;font-size:14px}
+.bar .tr{display:grid;gap:4px}
+.bar i{display:block;height:12px;border-radius:6px;min-width:2px}
+.bar .b1 i{background:#C9D6FF}.bar .b2 i{background:var(--royal)}
+.bar small{color:var(--muted);font-size:12px}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--muted);margin-bottom:6px}
+.legend span:before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:#C9D6FF}
+.legend span+span:before{background:var(--royal)}
+@media(max-width:600px){.bar{grid-template-columns:1fr}}
+.rv-list{display:grid;gap:14px}
+.rv{border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:grid;gap:10px}
+.rv.st-a{border-color:#BFE6CC;background:#FAFEFB}.rv.st-h{opacity:.7}
+.rv-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.rv-top b{color:var(--navy2);font-size:16px}
+.rv-stars{color:var(--gold2);font-size:18px;letter-spacing:1px}
+.rv-meta{font-size:13px;color:var(--muted)}
+.rv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;font-size:13px}
+.rv-grid div{background:var(--ice);border-radius:10px;padding:8px 10px}.rv-grid b{display:block;font-size:15px;color:var(--navy2)}
+.rv-t{font-size:14px}.rv-t dt{font-weight:700;color:var(--navy2);margin-top:6px}.rv-t dd{margin:2px 0 0;white-space:pre-wrap}
+.rv-pub{background:#FFF8E1;border-radius:12px;padding:10px 12px;font-size:14.5px}
+.rv-pub.none{background:#F3F4F7;color:var(--muted)}
+.pg{font-size:12.5px;white-space:nowrap}
+.rp{background:#fff;border-radius:18px;padding:28px;box-shadow:0 6px 20px rgba(6,16,63,.06)}
+.rp:empty{display:none}
+.rp h1{font-size:26px;color:var(--navy2);margin:0}
+.rp .tbl{margin-top:10px}
+.rp .rp-sub{color:var(--muted);margin:4px 0 20px}
+.rp h3{font-size:17px;color:var(--royal);margin:24px 0 10px;padding-top:14px;border-top:1px solid var(--line)}
+.rp-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.rp-kpis div{background:var(--ice);border-radius:12px;padding:12px 14px}
+.rp-kpis b{display:block;font-size:24px;color:var(--navy2)}.rp-kpis span{font-size:12.5px;color:var(--muted)}
+.rp table{min-width:0;font-size:13.5px}
+.rp ul{margin:6px 0 0;padding-left:20px;font-size:14px}.rp li{margin:4px 0}
+.rp .two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:760px){.rp .two{grid-template-columns:1fr}}
+@media print{body{background:#fff}.top,.tabs,.no-print,#err,#ok,.stats:not(.rp-kpis){display:none!important}[data-panel]:not([data-panel=report]){display:none!important}.rp{box-shadow:none;padding:0}.rp h3{break-after:avoid}.rp .two,.rp table{break-inside:avoid}}
+.designer{display:grid;grid-template-columns:minmax(260px,380px) 1fr;gap:22px;align-items:start}
+.d-prev canvas{width:100%;height:auto;border-radius:10px;box-shadow:0 6px 20px rgba(6,16,63,.12);background:#F4F6FC;aspect-ratio:2479/1754;display:block}
+.d-prev small{display:block;color:var(--muted);margin-top:8px}
+.d-result{margin-top:14px;background:#EAF7EF;border-radius:12px;padding:12px 14px;display:grid;gap:8px}
+.d-result b{color:#17733A}
+@media(max-width:860px){.designer{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -71,6 +119,9 @@ textarea{font:inherit;font-size:14px;border:1.5px solid var(--line);border-radiu
   <div id="app" hidden>
     <div class="tabs" role="tablist">
       <button role="tab" aria-selected="true" data-tab="reg">Enrollments</button>
+      <button role="tab" aria-selected="false" data-tab="training">Training</button>
+      <button role="tab" aria-selected="false" data-tab="reviews">Reviews <span id="rv-badge" class="tagb" style="display:none"></span></button>
+      <button role="tab" aria-selected="false" data-tab="report">Report</button>
       <button role="tab" aria-selected="false" data-tab="cohort">Cohort settings</button>
       <button role="tab" aria-selected="false" data-tab="certs">Certificates</button>
     </div>
@@ -95,6 +146,92 @@ textarea{font:inherit;font-size:14px;border:1.5px solid var(--line);border-radiu
       </div>
     </section>
 
+    <!-- TRAINING -->
+    <section data-panel="training" hidden style="padding:0">
+      <div class="stats" id="t-stats"></div>
+      <form class="card" id="t-class">
+        <h2>Class control</h2>
+        <p class="sub">Switch tests and attendance check-in on and off. Changes take effect immediately on every participant's portal.</p>
+        <div class="row2">
+          <label class="sw"><input type="checkbox" id="t-pre"><span>Pre-test open</span></label>
+          <label class="sw"><input type="checkbox" id="t-post"><span>Post-test open</span></label>
+        </div>
+        <div class="row2" style="margin-top:12px">
+          <div class="ck"><b>Day 1 check-in</b><input id="t-d1w" maxlength="30" placeholder="Session code, e.g. SALES27"><label class="sw"><input type="checkbox" id="t-d1o"><span>Open</span></label></div>
+          <div class="ck"><b>Day 2 check-in</b><input id="t-d2w" maxlength="30" placeholder="Session code, e.g. GROW28"><label class="sw"><input type="checkbox" id="t-d2o"><span>Open</span></label></div>
+        </div>
+        <div class="row2" style="margin-top:12px">
+          <label class="sw"><input type="checkbox" id="t-auto"><span>Issue Certificate of Participation automatically (both days + post-test)</span></label>
+          <label class="sw"><input type="checkbox" id="t-upg"><span>Offer the ₦10,000 Practitioner upgrade</span></label>
+        </div>
+        <div class="field" style="margin-top:12px;max-width:320px"><label for="t-chs">30-day challenge starts on</label><input id="t-chs" type="date"></div>
+        <div class="note" style="margin-top:14px">In class: show the session code on screen, switch check-in <b>Open</b> and save. Close it after about 30 minutes so the code can't be passed to people who are absent. You can also tick attendance by hand in the table below.</div>
+        <button class="sbtn" type="submit">Save class control</button>
+      </form>
+
+      <div class="card">
+        <h2>Training materials</h2>
+        <p class="sub">Files are private. Participants download them from their portal; every PDF is stamped with the participant's name on every page.</p>
+        <div class="tbl" style="margin-bottom:16px"><table style="min-width:640px"><thead><tr><th>Title</th><th>Opens</th><th>Size</th><th>Downloads</th><th></th></tr></thead><tbody id="t-mrows"></tbody></table></div>
+        <form id="t-up" class="row2" style="align-items:end">
+          <div class="field" style="margin:0"><label for="t-file">File (PDF recommended, up to 18 MB)</label><input id="t-file" type="file" required></div>
+          <div class="field" style="margin:0"><label for="t-mtitle">Title shown to participants</label><input id="t-mtitle" maxlength="90" placeholder="e.g. Participant Manual"></div>
+          <div class="field" style="margin:0"><label for="t-munlock">When it opens</label><select id="t-munlock"><option value="pre">After the pre-test (recommended)</option><option value="always">Straight away</option><option value="post">After the post-test</option><option value="referral">Referral reward (after 1 paid referral)</option><option value="practitioner">Practitioner upgrade members only</option></select></div>
+          <div><button class="sbtn" type="submit" id="t-upbtn">Upload</button> <span id="t-upmsg" class="sub"></span></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Participants</h2>
+        <p class="sub">Every confirmed enrollment gets an access code automatically. <b>Send code</b> opens WhatsApp with their code and portal link. Tick D1/D2 to mark attendance by hand.</p>
+        <div class="toolbar">
+          <input class="grow" id="t-q" placeholder="Search name, phone, code…">
+          <select id="t-fc"><option value="">All cohorts</option></select>
+          <button class="sbtn light" id="t-reload" type="button">Refresh</button>
+          <button class="sbtn light" id="t-csv" type="button">Download results CSV</button>
+        </div>
+        <div class="tbl"><table><thead><tr><th>Name</th><th>Access code</th><th>WhatsApp</th><th>Pre</th><th>Post</th><th>Gain</th><th>D1</th><th>D2</th><th>Files</th><th>Progress</th><th>Actions</th></tr></thead><tbody id="t-rows"></tbody></table></div>
+      </div>
+
+      <div class="card">
+        <h2>Practitioner upgrades (₦10,000)</h2>
+        <p class="sub">1) Check the transfer in your bank app and <b>Confirm</b>. 2) The participant does the 30-day challenge (at least 25 days with notes) and the Day 30 Scorecard. 3) When it shows <b>Ready</b>, check their results and click <b>Issue Practitioner certificate</b>.</p>
+        <div class="tbl"><table><thead><tr><th>Name</th><th>Payment</th><th>Paid from · amount · date</th><th>Receipt</th><th>Challenge</th><th>Day 1 → Day 30</th><th>Actions</th></tr></thead><tbody id="t-urows"></tbody></table></div>
+      </div>
+
+      <div class="card">
+        <h2>Question analysis</h2>
+        <p class="sub">Share of participants who answered each topic correctly — before and after the class. Low "after" scores show what to teach better next time.</p>
+        <div id="t-analysis"></div>
+      </div>
+    </section>
+
+    <!-- REVIEWS -->
+    <section data-panel="reviews" hidden style="padding:0">
+      <div class="stats" id="rv-stats"></div>
+      <div class="card">
+        <h2>Participant reviews</h2>
+        <p class="sub">Only reviews you <b>Approve</b> appear on the public <a href="/reviews/" target="_blank" rel="noopener">reviews page</a>. <b>Feature</b> puts a review on the home page (up to 3 show there). Gains, gaps and suggestions are always private.</p>
+        <div class="toolbar">
+          <select id="rv-f"><option value="">All reviews</option><option value="pending">Waiting for approval</option><option value="approved">Approved</option><option value="hidden">Hidden</option><option value="private">Private only (no permission)</option></select>
+          <select id="rv-c"><option value="">All cohorts</option></select>
+          <button class="sbtn light" id="rv-reload" type="button">Refresh</button>
+          <button class="sbtn light" id="rv-csv" type="button">Download CSV</button>
+        </div>
+        <div id="rv-list" class="rv-list"></div>
+      </div>
+    </section>
+
+    <!-- REPORT -->
+    <section data-panel="report" hidden style="padding:0">
+      <div class="card no-print">
+        <h2>Evaluation &amp; impact report</h2>
+        <p class="sub">One page for your records, partners and sponsors. Names are never shown — only totals and averages.</p>
+        <div class="toolbar"><select id="rp-c"><option value="">All cohorts</option></select><button class="sbtn" id="rp-go" type="button">Build report</button><button class="sbtn light" id="rp-print" type="button">Print / Save as PDF</button></div>
+      </div>
+      <div id="rp" class="rp"></div>
+    </section>
+
     <!-- COHORT -->
     <section data-panel="cohort" hidden style="padding:0">
       <form class="card" id="cohort-form">
@@ -109,7 +246,7 @@ textarea{font:inherit;font-size:14px;border:1.5px solid var(--line);border-radiu
         <div class="note">Leave the date empty to show "Date announced in the WhatsApp group". Past dates are hidden automatically.</div>
         <h3 style="margin:18px 0 8px;color:var(--navy2)">Private — for confirmed participants only</h3>
         <div class="field"><label for="s-join">Class link (Google Meet or Telegram)</label><input id="s-join" placeholder="https://meet.google.com/… or https://t.me/…" maxlength="300"></div>
-        <div class="field"><label for="s-jmsg">Message sent with the link <span class="opt">(optional — {name} and {link} are filled in for you)</span></label><textarea id="s-jmsg" maxlength="800" rows="8" style="min-height:190px"></textarea></div>
+        <div class="field"><label for="s-jmsg">Message sent with the link <span class="opt">(optional — {name}, {link}, {code} and {portal} are filled in for you)</span></label><textarea id="s-jmsg" maxlength="800" rows="8" style="min-height:190px"></textarea></div>
         <div class="note">This link is never shown on the public website. It is only used by the <b>Send link</b> button on confirmed enrollments.</div>
         <button class="sbtn" type="submit">Save settings</button>
       </form>
@@ -117,18 +254,30 @@ textarea{font:inherit;font-size:14px;border:1.5px solid var(--line);border-radiu
 
     <!-- CERTIFICATES -->
     <section data-panel="certs" hidden style="padding:0">
-      <div class="row2">
-        <form class="card" id="cert-one">
-          <h2>Add a certificate</h2>
-          <p class="sub">A unique number is created automatically.</p>
-          <div class="field"><label for="c-name">Participant name</label><input id="c-name" required maxlength="90"></div>
-          <div class="row2">
-            <div class="field"><label for="c-type">Type</label><select id="c-type"><option value="participation">Participation</option><option value="practitioner">Certified Practitioner</option></select></div>
-            <div class="field"><label for="c-date">Issue date</label><input id="c-date" type="date"></div>
+      <div class="card">
+        <h2>Certificate designer</h2>
+        <p class="sub">Pick a participant (or type any name), check the live preview, then <b>Issue</b>. The certificate gets a unique number, a QR code for verification and the Director of Studies' signature. Download it as PDF or JPG, or send the participant their personal download link.</p>
+        <div class="designer">
+          <div class="d-form">
+            <div class="field"><label for="d-who">Participant</label><select id="d-who"><option value="">— Type a name instead —</option></select></div>
+            <div class="field"><label for="d-name">Name on certificate</label><input id="d-name" maxlength="90" placeholder="e.g. Chioma Okafor"></div>
+            <div class="row2">
+              <div class="field"><label for="d-type">Type</label><select id="d-type"><option value="participation">Certificate of Participation</option><option value="practitioner">Certified Practitioner</option></select></div>
+              <div class="field"><label for="d-date">Issue date</label><input id="d-date" type="date"></div>
+            </div>
+            <div class="field"><label for="d-cohort">Cohort <span class="opt">(optional)</span></label><input id="d-cohort" maxlength="60"></div>
+            <button class="sbtn gold" id="d-issue" type="button">Issue certificate</button>
+            <div id="d-result" class="d-result" hidden></div>
           </div>
-          <div class="field"><label for="c-cohort">Cohort <span class="opt">(optional)</span></label><input id="c-cohort" maxlength="60"></div>
-          <button class="sbtn" type="submit">Add certificate</button>
-        </form>
+          <div class="d-prev"><canvas id="d-canvas" aria-label="Certificate preview"></canvas><small>Live preview. The real number and QR code are added when you issue.</small></div>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="card">
+          <h2>Issue to everyone who qualifies</h2>
+          <p class="sub">Creates a Certificate of Participation for every participant who attended <b>both days</b> and took the <b>post-test</b> and doesn't have one yet. They appear in each person's portal right away. (With automatic certificates switched on in Training → Class control, this also happens by itself.)</p>
+          <button class="sbtn" id="d-elig" type="button">Issue to all who qualify</button>
+        </div>
         <form class="card" id="cert-bulk">
           <h2>Add many at once</h2>
           <p class="sub">One name per line. All get the same type, date and cohort.</p>
@@ -144,11 +293,17 @@ textarea{font:inherit;font-size:14px;border:1.5px solid var(--line);border-radiu
         <h2>Issued certificates</h2>
         <p class="sub">Type each number on the certificate before sending it. Anyone can confirm it at <span class="mono">/verify</span>.</p>
         <div class="toolbar"><input class="grow" id="cq" placeholder="Search name or number…"><button class="sbtn light" id="ccsv" type="button">Download CSV</button></div>
-        <div class="tbl"><table><thead><tr><th>Number</th><th>Name</th><th>Type</th><th>Cohort</th><th>Issued</th><th>Verify link</th><th></th></tr></thead><tbody id="crows"></tbody></table></div>
+        <div class="tbl"><table><thead><tr><th>Number</th><th>Name</th><th>Type</th><th>Cohort</th><th>Issued</th><th>Certificate link</th><th></th></tr></thead><tbody id="crows"></tbody></table></div>
       </div>
     </section>
   </div>
 </div>
+<script src="/assets/js/vendor/qrcode.js"></script>
+<script src="/assets/js/cert-render.js"></script>
 <script src="/assets/js/admin.js"></script>
+<script src="/assets/js/admin-training.js"></script>
+<script src="/assets/js/admin-reviews.js"></script>
+<script src="/assets/js/admin-certs.js"></script>
+<script src="/assets/js/admin-report.js"></script>
 </body>
 </html>

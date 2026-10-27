@@ -29,8 +29,10 @@
     var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + text], { type: 'text/csv' })); a.download = name; a.click();
   }
 
+  function intlNo(phone) { var d = String(phone || '').replace(/\D/g, ''); if (d.startsWith('0')) d = '234' + d.slice(1); return d.length >= 10 ? d : ''; }
+  window.RA = { api: function (p, o) { return api(p, o); }, el: el, flash: flash, fail: function (e) { fail(e); }, fmtDate: fmtDate, csv: csv, intl: intlNo, token: function () { return token; } };
   // ---- auth ----
-  function showApp() { $('login').hidden = true; $('app').hidden = false; $('logout').hidden = false; loadRegs(); loadSettings(); loadCerts(); }
+  function showApp() { $('login').hidden = true; $('app').hidden = false; $('logout').hidden = false; loadRegs(); loadSettings(); loadCerts(); if (window.RA.onLogin) window.RA.onLogin(); }
   function logout() { token = ''; sessionStorage.removeItem(TK); $('app').hidden = true; $('logout').hidden = true; $('login').hidden = false; }
   $('login').addEventListener('submit', function (e) {
     e.preventDefault(); $('login-err').style.display = 'none';
@@ -50,7 +52,7 @@
 
   // ---- enrollments ----
   var src = 'enrollment', joinLink = '', joinMsg = '';
-  var DEFAULT_MSG = 'Hello {name}, your payment for Grow Your Sales with AI Skills has been confirmed. Welcome to Cohort 1! 🎉\n\nClass link: {link}\n\nClasses hold Tuesday 27 and Wednesday 28 October 2026, 5:00–8:00 PM (WAT). Please join 10 minutes early with your phone charged and an AI app ready (Meta AI, ChatGPT or Gemini).\n\nRoyalstars Technologies Ltd.';
+  var DEFAULT_MSG = 'Hello {name}, your payment for Grow Your Sales with AI Skills has been confirmed. Welcome to Cohort 1! 🎉\n\nClass link: {link}\n\nClasses hold Tuesday 27 and Wednesday 28 October 2026, 5:00–8:00 PM (WAT). Please join 10 minutes early with your phone charged and an AI app ready (Meta AI, ChatGPT or Gemini).\n\nYour personal access code: *{code}*\nYour training portal (pre-test, materials, attendance): {portal}\nPlease keep your code private.\n\nRoyalstars Technologies Ltd.';
   function loadRegs() {
     $('rows').replaceChildren(rowMsg('Loading…', 10));
     api('registrations?form=' + src).then(function (d) {
@@ -92,12 +94,15 @@
   }
   function intl(phone) { var d = String(phone || '').replace(/\D/g, ''); if (d.startsWith('0')) d = '234' + d.slice(1); return d.length >= 10 ? d : ''; }
   function setStatus(r, status) {
-    api('payments', { method: 'POST', body: { id: r.id, status: status, cohort: r.cohort || '' } }).then(function () { flash('ok', r.full_name + ' marked as ' + status + '.'); loadRegs(); }).catch(fail);
+    api('payments', { method: 'POST', body: { id: r.id, status: status, cohort: r.cohort || '', person: { full_name: r.full_name, phone: r.phone, participant_type: r.participant_type, business_type: r.business_type, location: r.location } } }).then(function () { flash('ok', r.full_name + ' marked as ' + status + '.'); loadRegs(); }).catch(fail);
   }
   function sendLink(r) {
     if (!joinLink) { flash('err', 'Add the class link in Cohort settings first.'); return; }
     var first = String(r.full_name || '').split(' ')[0];
-    var text = (joinMsg || DEFAULT_MSG).replace(/\{name\}/g, first).replace(/\{link\}/g, joinLink);
+    var tpl = joinMsg || DEFAULT_MSG;
+    if (r.access_code && tpl.indexOf('{code}') < 0) tpl += '\n\nYour personal access code: *{code}*\nYour training portal: {portal}';
+    var portal = location.origin + '/portal/' + (r.access_code ? '?c=' + r.access_code : '');
+    var text = tpl.replace(/\{name\}/g, first).replace(/\{link\}/g, joinLink).replace(/\{code\}/g, r.access_code || '(ask us for your code)').replace(/\{portal\}/g, portal);
     var n = intl(r.phone); if (!n) { flash('err', 'This phone number looks invalid.'); return; }
     window.open('https://wa.me/' + n + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
   }
@@ -125,12 +130,14 @@
       tr.appendChild(el('td', fmtDate(r.created_at)));
       var tdn = el('td'); tdn.appendChild(el('strong', r.full_name || '')); if (r.email) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('small', r.email)); }
       if (r._early) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('span', 'EARLY BIRD', 'tagb')); }
-      if (r.announce_ok) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('small', '📣 OK to welcome in group')); } tr.appendChild(tdn);
+      if (r.announce_ok) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('small', '📣 OK to welcome in group')); }
+      if (r.access_code) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('span', r.access_code, 'tagp mono')); } tr.appendChild(tdn);
       var tdp = el('td'); var n = intl(r.phone); if (n) { var a = el('a', r.phone); a.href = 'https://wa.me/' + n; a.target = '_blank'; a.rel = 'noopener'; tdp.appendChild(a); } else tdp.textContent = r.phone || ''; tr.appendChild(tdp);
       var tds = el('td'); if (src === 'enrollment') tds.appendChild(el('span', r.payment_status, 'st-' + r.payment_status)); else tds.textContent = '—'; tr.appendChild(tds);
       var tdpay = el('td'); if (src === 'enrollment') { tdpay.appendChild(el('div', r.sender_name || '')); tdpay.appendChild(el('small', naira(r.amount_paid) + ' · ' + (r.payment_date || '') + (r.payment_ref ? ' · ref ' + r.payment_ref : ''))); } tr.appendChild(tdpay);
       var tdr = el('td'); if (r.proof_url) { var ra = el('a', 'View'); ra.href = r.proof_url; ra.target = '_blank'; ra.rel = 'noopener'; tdr.appendChild(ra); } else tdr.appendChild(el('small', src === 'enrollment' ? 'none — check WhatsApp' : '')); tr.appendChild(tdr);
-      var tda = el('td'); tda.appendChild(el('div', r.participant_type || '')); tda.appendChild(el('small', [r.business_type, r.business_name].filter(Boolean).join(' · '))); tr.appendChild(tda);
+      var tda = el('td'); tda.appendChild(el('div', r.participant_type || '')); tda.appendChild(el('small', [r.business_type, r.business_name].filter(Boolean).join(' · ')));
+      if (r.referrer) { tda.appendChild(document.createElement('br')); tda.appendChild(el('small', '🎁 Referred by ' + r.referrer)); } tr.appendChild(tda);
       tr.appendChild(el('td', r.location || ''));
       var tdx = el('td'), acts = el('div', null, 'acts');
       if (src === 'enrollment') {
@@ -151,12 +158,12 @@
   $('fsrc').onchange = function () { src = $('fsrc').value; selected.clear(); updIssue(); loadRegs(); };
   $('all').onchange = function () { filtered().forEach(function (r) { $('all').checked ? selected.add(r.id) : selected.delete(r.id); }); renderRegs(); updIssue(); };
   $('csv').onclick = function () {
-    csv([['Date', 'Name', 'WhatsApp', 'Email', 'Payment status', 'Paid from', 'Amount', 'Payment date', 'Reference', 'Receipt', 'I am', 'Business/idea', 'Business name', 'City', 'Heard from', 'Cohort', 'Early bird', 'OK to welcome in group']].concat(filtered().map(function (r) {
-      return [fmtDate(r.created_at), r.full_name, r.phone, r.email, r.payment_status, r.sender_name, r.amount_paid, r.payment_date, r.payment_ref, r.proof_url, r.participant_type, r.business_type, r.business_name, r.location, r.heard_from, r.cohort, r._early ? 'Yes' : '', r.announce_ok ? 'Yes' : ''];
+    csv([['Date', 'Name', 'WhatsApp', 'Email', 'Payment status', 'Paid from', 'Amount', 'Payment date', 'Reference', 'Receipt', 'I am', 'Business/idea', 'Business name', 'City', 'Heard from', 'Cohort', 'Early bird', 'OK to welcome in group', 'Referred by', 'Access code']].concat(filtered().map(function (r) {
+      return [fmtDate(r.created_at), r.full_name, r.phone, r.email, r.payment_status, r.sender_name, r.amount_paid, r.payment_date, r.payment_ref, r.proof_url, r.participant_type, r.business_type, r.business_name, r.location, r.heard_from, r.cohort, r._early ? 'Yes' : '', r.announce_ok ? 'Yes' : '', r.referrer || '', r.access_code || ''];
     })), src + '.csv');
   };
   $('issue').onclick = function () {
-    var items = regs.filter(function (r) { return selected.has(r.id); }).map(function (r) { return { name: r.full_name, type: 'participation', cohort: r.cohort || '' }; });
+    var items = regs.filter(function (r) { return selected.has(r.id); }).map(function (r) { return { name: r.full_name, type: 'participation', cohort: r.cohort || '', code: r.access_code || '' }; });
     if (!confirm('Create ' + items.length + ' Certificate(s) of Participation?')) return;
     api('certificates', { method: 'POST', body: { items: items } }).then(function (d) { flash('ok', d.items.length + ' certificate(s) created. See the Certificates tab for their numbers.'); selected.clear(); updIssue(); renderRegs(); loadCerts(); }).catch(fail);
   };
@@ -175,6 +182,7 @@
 
   // ---- certificates ----
   function loadCerts() { api('certificates').then(function (d) { certs = d.items || []; renderCerts(); }).catch(fail); }
+  window.RA.loadCerts = function () { loadCerts(); };
   function renderCerts() {
     var q = $('cq').value.toLowerCase().trim(), body = $('crows');
     var list = certs.filter(function (c) { return !q || (c.name + ' ' + c.number).toLowerCase().indexOf(q) > -1; });
@@ -185,8 +193,9 @@
       tr.appendChild(el('td', c.name));
       var tdt = el('td'); tdt.appendChild(el('span', c.type_key === 'practitioner' ? 'Practitioner' : 'Participation', 'tagp')); tr.appendChild(tdt);
       tr.appendChild(el('td', c.cohort || '')); tr.appendChild(el('td', c.issued || ''));
-      var link = location.origin + '/verify/?no=' + encodeURIComponent(c.number);
-      var tdl = el('td'), cp = el('button', 'Copy link', 'sbtn light'); cp.type = 'button';
+      var link = location.origin + '/certificate/?no=' + encodeURIComponent(c.number);
+      var tdl = el('td'), op = el('a', 'Open', 'sbtn light'); op.href = link; op.target = '_blank'; op.rel = 'noopener'; op.style.textDecoration = 'none'; op.style.marginRight = '6px'; tdl.appendChild(op);
+      var cp = el('button', 'Copy link', 'sbtn light'); cp.type = 'button';
       cp.onclick = function () { navigator.clipboard.writeText(link).then(function () { cp.textContent = 'Copied ✓'; setTimeout(function () { cp.textContent = 'Copy link'; }, 1500); }); };
       tdl.appendChild(cp); tr.appendChild(tdl);
       var tdx = el('td'), del = el('button', 'Revoke', 'sbtn danger'); del.type = 'button';
@@ -196,13 +205,8 @@
     }));
   }
   $('cq').oninput = renderCerts;
-  $('ccsv').onclick = function () { csv([['Number', 'Name', 'Type', 'Cohort', 'Issued', 'Verify link']].concat(certs.map(function (c) { return [c.number, c.name, c.type, c.cohort, c.issued, location.origin + '/verify/?no=' + c.number]; })), 'certificates.csv'); };
-  var today = new Date().toISOString().slice(0, 10); $('c-date').value = today;
-  $('cert-one').addEventListener('submit', function (e) {
-    e.preventDefault();
-    api('certificates', { method: 'POST', body: { name: $('c-name').value, type: $('c-type').value, issued: $('c-date').value, cohort: $('c-cohort').value } })
-      .then(function (d) { if (!d.items.length) throw new Error('Name is too short.'); flash('ok', 'Created ' + d.items[0].number + ' for ' + d.items[0].name + '.'); $('c-name').value = ''; loadCerts(); }).catch(fail);
-  });
+  $('ccsv').onclick = function () { csv([['Number', 'Name', 'Type', 'Cohort', 'Issued', 'Verify link']].concat(certs.map(function (c) { return [c.number, c.name, c.type, c.cohort, c.issued, location.origin + '/certificate/?no=' + c.number]; })), 'certificates.csv'); };
+  var today = new Date().toISOString().slice(0, 10);
   $('cert-bulk').addEventListener('submit', function (e) {
     e.preventDefault();
     var names = $('b-names').value.split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);

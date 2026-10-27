@@ -75,6 +75,47 @@ each Confirm. The participant number appears from 3 confirmed upward; the early-
 Set the class link (Google Meet or Telegram) and the message once in **Cohort settings → Class link**.
 The class link is private: it is never shown on the public website.
 
+## 4b. Training portal (`/portal/`)
+Every confirmed participant gets a personal access code (e.g. `RST-7K3Q-92XM`) automatically. It is added to the
+**Send link** WhatsApp message, and the **Training** tab has a **Send code** button for each person.
+With the code, participants open `/portal/` and find: the live-class link, the pre-test, their training files,
+attendance check-in and (from Day 2) the post-test.
+
+Admin → **Training**:
+- **Class control:** switch the pre-test and post-test on/off; type a session code and tick **Open** to start
+  check-in during class (close it after ~30 minutes). Attendance can also be ticked by hand.
+- **Training materials:** upload PDFs (up to 18 MB) and choose when each opens (after the pre-test is recommended).
+  Every PDF is stamped with the participant's name and a licence number on every page when they download it.
+- **Participants:** scores, improvement, attendance, downloads, and **Switch off** for a code that is being shared.
+- **Question analysis:** % correct per topic before vs after, to see what to teach better.
+- **Download results CSV** for your evaluation records.
+
+The test questions live in `netlify/lib/questions.mjs`.
+
+**Reviews:** after the post-test, participants rate the class (overall, content, facilitator, practical value,
+platform), say how likely they are to recommend it (0–10), and write what they gained, gaps and suggestions.
+They can tick permission to publish a short public review. Admin → **Reviews**: **Approve** puts it on `/reviews/`;
+**Feature** also shows it on the home page (up to 3). **Hide** removes it. Gains, gaps and suggestions are never public.
+The home-page "What participants say" section appears automatically once you approve your first review.
+
+## 4c. Certificates, Practitioner upgrade, challenge, referrals, report
+- **Automatic certificates:** when a participant has Day 1 + Day 2 attendance and the post-test, their
+  Certificate of Participation is created and appears in their portal (switch in Training → Class control).
+- **Certificate designer** (Certificates tab): pick a participant or type a name, see a live preview, **Issue**,
+  then download PDF/JPG or send the personal link (`/certificate/?no=…`). Each certificate carries a QR code to
+  `/verify/` and Christopher's signature (`assets/img/signature.png`). **Issue to all who qualify** does a batch.
+  Wrong name? Training → **Edit name**, then revoke and re-issue.
+- **30-day challenge:** tasks from the manual (business-owner or starting-out lane). One day unlocks each day
+  from the start date set in Class control. Day 30 scorecard opens on day 28.
+- **Practitioner upgrade (₦10,000):** offered in the portal after the post-test and review. Bank transfer +
+  form + receipt. Training → **Practitioner upgrades**: Confirm payment → when it shows **READY** (25+ days
+  with notes + Day 30 scorecard) → **Issue Practitioner certificate**.
+- **Referrals:** each participant has a link `/?ref=XXXXXX`. Enrollments through it show "Referred by" and
+  count in the portal. Reward: 1 extra week of free AI-deployment consulting + the Automation Guide (upload it
+  in Training materials with "Referral reward" so it unlocks after 1 paid referral).
+- **Report tab:** enrollment, attendance, learning gain, confidence, topic analysis, satisfaction/NPS, Day 1 → Day 30
+  impact, upgrades and referrals. **Print / Save as PDF** for sponsors. No names are shown.
+
 ## 5. Every new cohort (every 2 weeks)
 Go to `/admin/` → **Cohort settings**:
 - **Cohort name**, e.g. `Cohort 3 — November 2026` (new registrations are tagged with it)

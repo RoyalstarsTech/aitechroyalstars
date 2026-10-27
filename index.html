@@ -214,10 +214,11 @@
   </div>
 </section>
 
-<!-- TESTIMONIALS: unhide (remove the "hidden" attribute) once you have real participant testimonials -->
+<!-- TESTIMONIALS: filled automatically with reviews you approve and feature in the admin page -->
 <section class="testimonials" id="testimonials" hidden aria-labelledby="t-title">
   <div class="wrap center"><span class="kicker">Success stories</span><h2 id="t-title">What participants say</h2>
-    <!-- Add real testimonials here, with each participant's permission. -->
+    <div class="rv-cards" id="home-reviews"></div>
+    <a class="btn btn-plain" href="/reviews/" style="margin-top:26px">Read all reviews</a>
   </div>
 </section>
 
@@ -257,6 +258,7 @@
         <form name="enrollment" method="POST" action="/thank-you/" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data" id="reg-form" novalidate>
           <input type="hidden" name="form-name" value="enrollment">
           <input type="hidden" name="cohort" id="f-cohort" value="Cohort 1 — October 2026">
+          <input type="hidden" name="referred_by" id="f-referral" value="">
           <p class="sr"><label>Leave this empty: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
           <h3>Enrollment form</h3>
           <p class="hint">Make your transfer first, then fill this form. Fields marked optional can be skipped.</p>
@@ -356,7 +358,7 @@
         <li><a class="js-mail" href="mailto:infoatroyalstars@gmail.com">infoatroyalstars@gmail.com</a></li>
         <li class="js-loc">Abuja, Nigeria</li></ul></div>
       <div><h4>Links</h4><ul>
-        <li><a href="#register">Enrol</a></li><li><a href="/verify/">Verify a certificate</a></li><li><a href="/privacy/">Privacy notice</a></li><li><a class="js-wa" href="#" target="_blank" rel="noopener">WhatsApp group</a></li></ul></div>
+        <li><a href="#register">Enrol</a></li><li><a href="/reviews/">Participant reviews</a></li><li><a href="/portal/">My Training (participants)</a></li><li><a href="/verify/">Verify a certificate</a></li><li><a href="/privacy/">Privacy notice</a></li><li><a class="js-wa" href="#" target="_blank" rel="noopener">WhatsApp group</a></li></ul></div>
     </div>
     <div class="foot-bottom"><span>© <span id="yr">2026</span> Royalstars Technologies Ltd. All rights reserved.</span><span>Abuja, Nigeria</span></div>
   </div>
@@ -367,5 +369,7 @@
 
 <script src="/assets/js/site.js"></script>
 <script src="/assets/js/landing.js"></script>
+<script src="/assets/js/reviews.js"></script>
+<script>RST_REVIEWS.load(document.getElementById("home-reviews"), {home: true, section: document.getElementById("testimonials")});</script>
 </body>
 </html>

@@ -44,6 +44,16 @@
     });
   }).catch(function () {});
 
+  // ---- referral link (?ref=ABC123) — remembered for 30 days ----
+  (function () {
+    var r = (new URLSearchParams(location.search).get('ref') || '').toUpperCase();
+    try {
+      if (/^[A-F0-9]{6}$/.test(r)) localStorage.setItem('rst_ref', JSON.stringify({ r: r, t: Date.now() }));
+      var s = JSON.parse(localStorage.getItem('rst_ref') || 'null');
+      if (s && Date.now() - s.t < 30 * 864e5) { var f = document.getElementById('f-referral'); if (f) f.value = s.r; }
+    } catch (e) { if (/^[A-F0-9]{6}$/.test(r)) { var g = document.getElementById('f-referral'); if (g) g.value = r; } }
+  })();
+
   // ---- copy buttons ----
   document.querySelectorAll('[data-copy]').forEach(function (b) {
     b.addEventListener('click', function () {
