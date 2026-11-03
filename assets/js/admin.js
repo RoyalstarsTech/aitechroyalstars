@@ -51,8 +51,14 @@
   });
 
   // ---- enrollments ----
-  var src = 'enrollment', joinLink = '', joinMsg = '';
-  var DEFAULT_MSG = 'Hello {name}, your payment for Grow Your Sales with AI Skills has been confirmed. Welcome to Cohort 1! 🎉\n\nClass link: {link}\n\nClasses hold Tuesday 27 and Wednesday 28 October 2026, 5:00–8:00 PM (WAT). Please join 10 minutes early with your phone charged and an AI app ready (Meta AI, ChatGPT or Gemini).\n\nYour personal access code: *{code}*\nYour training portal (pre-test, materials, attendance): {portal}\nPlease keep your code private.\n\nRoyalstars Technologies Ltd.';
+  var src = 'enrollment', joinLink = '', joinMsg = '', freeLink = '';
+  function isInst(r) { return r.payment_plan === 'instalment'; }
+  function fullyPaid(r) { return r.payment_status === 'confirmed' && (!isInst(r) || r.balance_paid); }
+  function balanceDue(r) { return r.payment_status === 'confirmed' && isInst(r) && !r.balance_paid; }
+  function paidSoFar(r) { var a = Number(r.amount_paid) || 0; return isInst(r) && r.balance_paid ? a * 2 : a; }
+  var FREE_MSG = 'Hello {name}, thank you for registering for our FREE session: *Introduction to AI Tools* 🎉\n\nSaturday 14 November 2026, 5:00 PM (WAT) on Google Meet.\nJoin here: {link}\n\nPlease join 5 minutes early with your phone charged and Meta AI, ChatGPT or Gemini ready.\n\nRoyalstars Technologies Ltd.';
+  var BAL_MSG = 'Hello {name}, thank you for your first payment for *Grow Your Sales with AI Skills* (Cohort 2). 🙏\n\nA friendly reminder: your balance of *{amount}* is due by *Friday 27 November 2026*, before the class on Saturday 28 November. Your class link is sent once the balance is received.\n\nPay to: Opay · 7039106808 · Christopher Ohirein, then send the receipt here.\n\nRoyalstars Technologies Ltd.';
+  var DEFAULT_MSG = 'Hello {name}, your payment for Grow Your Sales with AI Skills has been confirmed. Welcome to Cohort 2! 🎉\n\nClass link: {link}\n\nClasses hold Saturday 28 and Sunday 29 November 2026, 5:00–8:00 PM (WAT). Please join 10 minutes early with your phone charged and an AI app ready (Meta AI, ChatGPT or Gemini).\n\nYour personal access code: *{code}*\nYour training portal (pre-test, materials, attendance): {portal}\nPlease keep your code private.\n\nRoyalstars Technologies Ltd.';
   function loadRegs() {
     $('rows').replaceChildren(rowMsg('Loading…', 10));
     api('registrations?form=' + src).then(function (d) {
@@ -60,8 +66,8 @@
       var count = {}, conf = {};
       regs.forEach(function (r) {
         var k = r.cohort || '(no cohort)'; count[k] = (count[k] || 0) + 1;
-        if (src === 'enrollment') { if (r.payment_status === 'confirmed') { conf[k] = (conf[k] || 0) + 1; r._early = conf[k] <= 15; } }
-        else r._early = count[k] <= 15;
+        if (src === 'enrollment') { if (fullyPaid(r)) { conf[k] = (conf[k] || 0) + 1; r._early = conf[k] <= 15; } }
+        else if (src === 'registration') r._early = count[k] <= 15;
       });
       var fc = $('fc'), cur = fc.value; fc.replaceChildren(el('option', 'All cohorts'));
       fc.firstChild.value = '';
@@ -75,8 +81,9 @@
     var s;
     if (src === 'enrollment') {
       var c = regs.filter(function (r) { return r.payment_status === 'confirmed'; });
-      var total = c.reduce(function (a, r) { return a + (Number(r.amount_paid) || 0); }, 0);
-      s = [[regs.length, 'Enrollments submitted'], [regs.filter(function (r) { return r.payment_status === 'pending'; }).length, 'Waiting for confirmation'], [c.length, 'Confirmed participants'], [naira(total), 'Confirmed payments']];
+      var total = c.reduce(function (a, r) { return a + paidSoFar(r); }, 0);
+      var due = regs.filter(balanceDue);
+      s = [[regs.length, 'Enrollments submitted'], [regs.filter(function (r) { return r.payment_status === 'pending'; }).length, 'Waiting for confirmation'], [regs.filter(fullyPaid).length, 'Fully paid participants'], [due.length + ' · ' + naira(due.reduce(function (a, r) { return a + (Number(r.amount_paid) || 0); }, 0)), 'Balances still due'], [naira(total), 'Money received']];
     } else {
       var today = new Date().toDateString(), week = Date.now() - 7 * 864e5;
       s = [[regs.length, 'Total registrations'], [regs.filter(function (r) { return new Date(r.created_at).toDateString() === today; }).length, 'Today'], [regs.filter(function (r) { return new Date(r.created_at) > week; }).length, 'Last 7 days'], [Object.keys(count).length, 'Cohorts']];
@@ -87,9 +94,9 @@
     var q = $('q').value.toLowerCase().trim(), c = $('fc').value, st = $('fstat').value;
     return regs.slice().reverse().filter(function (r) {
       if (c && (r.cohort || '(no cohort)') !== c) return false;
-      if (st && src === 'enrollment' && r.payment_status !== st) return false;
+      if (st && src === 'enrollment') { if (st === 'balance') { if (!balanceDue(r)) return false; } else if (r.payment_status !== st) return false; }
       if (!q) return true;
-      return [r.full_name, r.phone, r.email, r.business_name, r.location, r.business_type, r.sender_name, r.payment_ref].join(' ').toLowerCase().indexOf(q) > -1;
+      return [r.full_name, r.phone, r.email, r.business_name, r.location, r.business_type, r.sender_name, r.payment_ref, r.question].join(' ').toLowerCase().indexOf(q) > -1;
     });
   }
   function intl(phone) { var d = String(phone || '').replace(/\D/g, ''); if (d.startsWith('0')) d = '234' + d.slice(1); return d.length >= 10 ? d : ''; }
@@ -106,6 +113,17 @@
     var n = intl(r.phone); if (!n) { flash('err', 'This phone number looks invalid.'); return; }
     window.open('https://wa.me/' + n + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
   }
+  function waTo(r, text) { var n = intl(r.phone); if (!n) { flash('err', 'This phone number looks invalid.'); return; } window.open('https://wa.me/' + n + '?text=' + encodeURIComponent(text), '_blank', 'noopener'); }
+  function firstName(r) { return String(r.full_name || '').trim().split(/\s+/)[0]; }
+  function sendFree(r) {
+    if (!freeLink) { flash('err', 'Add the free session Meet link in Cohort settings first.'); return; }
+    waTo(r, FREE_MSG.replace(/\{name\}/g, firstName(r)).replace(/\{link\}/g, freeLink));
+  }
+  function remindBalance(r) { waTo(r, BAL_MSG.replace(/\{name\}/g, firstName(r)).replace(/\{amount\}/g, naira(r.amount_paid))); }
+  function balanceReceived(r) {
+    if (!confirm('Have you seen the balance of ' + naira(r.amount_paid) + ' from ' + (r.sender_name || r.full_name) + ' in your bank app?')) return;
+    api('payments', { method: 'POST', body: { id: r.id, status: 'confirmed', balance: true, cohort: r.cohort || '', person: { full_name: r.full_name, phone: r.phone, participant_type: r.participant_type, business_type: r.business_type, location: r.location } } }).then(function () { flash('ok', r.full_name + ' is now fully paid. You can send the class link.'); loadRegs(); }).catch(fail);
+  }
   function siteUrl() { return location.origin + '/#register'; }
   function shareToGroup(r) {
     var k = r.cohort || '(no cohort)';
@@ -117,7 +135,7 @@
       confirmed + ' participant' + (confirmed === 1 ? '' : 's') + ' confirmed for *Grow Your Sales with AI Skills*' + (r.cohort ? ' (' + r.cohort + ')' : '') + '.\n' +
       (left > 0 ? 'Only ' + left + ' early-bird spot' + (left === 1 ? '' : 's') + ' left: 6 months FREE Google Gemini AI + Google One storage. 🎁\n'
                 : 'Early-bird spots are all taken, but seats are still open.\n') +
-      '\nLive online: Tue 27 & Wed 28 Oct, 5–8 PM. Fee ₦15,000.\nEnrol here 👉 ' + siteUrl();
+      '\nLive online: Sat 28 & Sun 29 Nov, 5–8 PM. Fee ₦15,000.\nEnrol here 👉 ' + siteUrl();
     window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
   }
   function renderRegs() {
@@ -133,8 +151,8 @@
       if (r.announce_ok) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('small', '📣 OK to welcome in group')); }
       if (r.access_code) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('span', r.access_code, 'tagp mono')); } tr.appendChild(tdn);
       var tdp = el('td'); var n = intl(r.phone); if (n) { var a = el('a', r.phone); a.href = 'https://wa.me/' + n; a.target = '_blank'; a.rel = 'noopener'; tdp.appendChild(a); } else tdp.textContent = r.phone || ''; tr.appendChild(tdp);
-      var tds = el('td'); if (src === 'enrollment') tds.appendChild(el('span', r.payment_status, 'st-' + r.payment_status)); else tds.textContent = '—'; tr.appendChild(tds);
-      var tdpay = el('td'); if (src === 'enrollment') { tdpay.appendChild(el('div', r.sender_name || '')); tdpay.appendChild(el('small', naira(r.amount_paid) + ' · ' + (r.payment_date || '') + (r.payment_ref ? ' · ref ' + r.payment_ref : ''))); } tr.appendChild(tdpay);
+      var tds = el('td'); if (src === 'enrollment') { tds.appendChild(el('span', r.payment_status, 'st-' + r.payment_status)); if (isInst(r)) { tds.appendChild(document.createElement('br')); tds.appendChild(el('small', 'Instalments · ' + (r.balance_paid ? 'balance paid ✓' : 'balance due ' + naira(r.amount_paid)))); } } else tds.textContent = src === 'free-session' ? 'Free' : '—'; tr.appendChild(tds);
+      var tdpay = el('td'); if (src === 'enrollment') { tdpay.appendChild(el('div', r.sender_name || '')); tdpay.appendChild(el('small', naira(r.amount_paid) + (isInst(r) ? ' (1st of 2)' : '') + ' · ' + (r.payment_date || '') + (r.payment_ref ? ' · ref ' + r.payment_ref : ''))); } else if (r.question) { tdpay.appendChild(el('small', '❓ ' + r.question)); } tr.appendChild(tdpay);
       var tdr = el('td'); if (r.proof_url) { var ra = el('a', 'View'); ra.href = r.proof_url; ra.target = '_blank'; ra.rel = 'noopener'; tdr.appendChild(ra); } else tdr.appendChild(el('small', src === 'enrollment' ? 'none — check WhatsApp' : '')); tr.appendChild(tdr);
       var tda = el('td'); tda.appendChild(el('div', r.participant_type || '')); tda.appendChild(el('small', [r.business_type, r.business_name].filter(Boolean).join(' · ')));
       if (r.referrer) { tda.appendChild(document.createElement('br')); tda.appendChild(el('small', '🎁 Referred by ' + r.referrer)); } tr.appendChild(tda);
@@ -142,11 +160,16 @@
       var tdx = el('td'), acts = el('div', null, 'acts');
       if (src === 'enrollment') {
         if (r.payment_status !== 'confirmed') { var c = el('button', 'Confirm', 'sbtn'); c.type = 'button'; c.onclick = function () { if (confirm('Have you seen ' + naira(r.amount_paid) + ' from "' + r.sender_name + '" in your bank app?')) setStatus(r, 'confirmed'); }; acts.appendChild(c); }
-        if (r.payment_status === 'confirmed') { var sl = el('button', 'Send link', 'sbtn gold'); sl.type = 'button'; sl.onclick = function () { sendLink(r); }; acts.appendChild(sl); }
+        if (balanceDue(r)) {
+          var br = el('button', 'Balance received', 'sbtn'); br.type = 'button'; br.onclick = function () { balanceReceived(r); }; acts.appendChild(br);
+          var rb = el('button', 'Remind balance', 'sbtn light'); rb.type = 'button'; rb.title = 'Opens WhatsApp with a polite reminder'; rb.onclick = function () { remindBalance(r); }; acts.appendChild(rb);
+        }
+        if (fullyPaid(r)) { var sl = el('button', 'Send link', 'sbtn gold'); sl.type = 'button'; sl.onclick = function () { sendLink(r); }; acts.appendChild(sl); }
         if (r.payment_status === 'confirmed' && r.announce_ok) { var sg = el('button', 'Share to group', 'sbtn'); sg.type = 'button'; sg.title = 'Opens WhatsApp — choose your community group'; sg.onclick = function () { shareToGroup(r); }; acts.appendChild(sg); }
         if (r.payment_status === 'confirmed' && !r.announce_ok) acts.appendChild(el('small', 'No group shout-out'));
         if (r.payment_status !== 'rejected') { var rj = el('button', r.payment_status === 'confirmed' ? 'Undo' : 'Reject', 'sbtn light'); rj.type = 'button'; rj.onclick = function () { if (confirm('Mark as ' + (r.payment_status === 'confirmed' ? 'pending' : 'rejected') + '?')) setStatus(r, r.payment_status === 'confirmed' ? 'pending' : 'rejected'); }; acts.appendChild(rj); }
       }
+      if (src === 'free-session') { var fm = el('button', 'Send Meet link', 'sbtn gold'); fm.type = 'button'; fm.onclick = function () { sendFree(r); }; acts.appendChild(fm); }
       var del = el('button', 'Delete', 'sbtn danger'); del.type = 'button';
       del.onclick = function () { if (!confirm('Delete this entry permanently? Use this only for spam or duplicates.')) return; api('registrations?id=' + encodeURIComponent(r.id), { method: 'DELETE' }).then(function () { flash('ok', 'Deleted.'); loadRegs(); }).catch(fail); };
       acts.appendChild(del); tdx.appendChild(acts); tr.appendChild(tdx);
@@ -158,8 +181,8 @@
   $('fsrc').onchange = function () { src = $('fsrc').value; selected.clear(); updIssue(); loadRegs(); };
   $('all').onchange = function () { filtered().forEach(function (r) { $('all').checked ? selected.add(r.id) : selected.delete(r.id); }); renderRegs(); updIssue(); };
   $('csv').onclick = function () {
-    csv([['Date', 'Name', 'WhatsApp', 'Email', 'Payment status', 'Paid from', 'Amount', 'Payment date', 'Reference', 'Receipt', 'I am', 'Business/idea', 'Business name', 'City', 'Heard from', 'Cohort', 'Early bird', 'OK to welcome in group', 'Referred by', 'Access code']].concat(filtered().map(function (r) {
-      return [fmtDate(r.created_at), r.full_name, r.phone, r.email, r.payment_status, r.sender_name, r.amount_paid, r.payment_date, r.payment_ref, r.proof_url, r.participant_type, r.business_type, r.business_name, r.location, r.heard_from, r.cohort, r._early ? 'Yes' : '', r.announce_ok ? 'Yes' : '', r.referrer || '', r.access_code || ''];
+    csv([['Date', 'Name', 'WhatsApp', 'Email', 'Payment status', 'Paid from', 'Amount', 'Payment date', 'Reference', 'Receipt', 'I am', 'Business/idea', 'Business name', 'City', 'Heard from', 'Cohort', 'Early bird', 'OK to welcome in group', 'Referred by', 'Access code', 'Payment plan', 'Balance paid', 'Question']].concat(filtered().map(function (r) {
+      return [fmtDate(r.created_at), r.full_name, r.phone, r.email, r.payment_status, r.sender_name, r.amount_paid, r.payment_date, r.payment_ref, r.proof_url, r.participant_type, r.business_type, r.business_name, r.location, r.heard_from, r.cohort, r._early ? 'Yes' : '', r.announce_ok ? 'Yes' : '', r.referrer || '', r.access_code || '', isInst(r) ? 'Instalments' : (src === 'enrollment' ? 'Full' : ''), isInst(r) ? (r.balance_paid ? 'Yes' : 'No') : '', r.question || ''];
     })), src + '.csv');
   };
   $('issue').onclick = function () {
@@ -171,13 +194,13 @@
   // ---- settings ----
   function toLocalInput(iso) { if (!iso) return ''; var d = new Date(iso); if (isNaN(d)) return ''; var l = new Date(d.getTime() + 60 * 60000); return l.toISOString().slice(0, 16); }
   function loadSettings() {
-    api('settings').then(function (s) { $('s-name').value = s.cohort_name || ''; $('s-start').value = toLocalInput(s.cohort_start); $('s-wa').value = s.whatsapp_group || ''; $('s-note').value = s.cohort_note || ''; joinLink = s.join_link || ''; joinMsg = s.join_message || ''; $('s-join').value = joinLink; $('s-jmsg').value = joinMsg || DEFAULT_MSG; }).catch(fail);
+    api('settings').then(function (s) { $('s-name').value = s.cohort_name || ''; $('s-start').value = toLocalInput(s.cohort_start); $('s-wa').value = s.whatsapp_group || ''; $('s-note').value = s.cohort_note || ''; joinLink = s.join_link || ''; joinMsg = s.join_message || ''; freeLink = s.free_link || ''; if ($('s-free')) $('s-free').value = freeLink; $('s-join').value = joinLink; $('s-jmsg').value = joinMsg || DEFAULT_MSG; }).catch(fail);
   }
   $('cohort-form').addEventListener('submit', function (e) {
     e.preventDefault();
     var v = $('s-start').value; // interpreted as Lagos time (UTC+1)
-    var body = { cohort_name: $('s-name').value, cohort_start: v ? v + ':00+01:00' : '', whatsapp_group: $('s-wa').value, cohort_note: $('s-note').value, join_link: $('s-join').value.trim(), join_message: $('s-jmsg').value.trim() === DEFAULT_MSG ? '' : $('s-jmsg').value.trim() };
-    api('settings', { method: 'PUT', body: body }).then(function (r) { joinLink = r.join_link || ''; joinMsg = r.join_message || ''; flash('ok', 'Saved. The landing page now shows these details.'); }).catch(fail);
+    var body = { cohort_name: $('s-name').value, cohort_start: v ? v + ':00+01:00' : '', whatsapp_group: $('s-wa').value, cohort_note: $('s-note').value, join_link: $('s-join').value.trim(), join_message: $('s-jmsg').value.trim() === DEFAULT_MSG ? '' : $('s-jmsg').value.trim(), free_link: $('s-free') ? $('s-free').value.trim() : '' };
+    api('settings', { method: 'PUT', body: body }).then(function (r) { joinLink = r.join_link || ''; joinMsg = r.join_message || ''; freeLink = r.free_link || ''; flash('ok', 'Saved. The landing page now shows these details.'); }).catch(fail);
   });
 
   // ---- certificates ----

@@ -39,7 +39,7 @@
   function render(d, stay) {
     ME = d; if (!stay) msg('');
     $('pt-title').textContent = 'Welcome, ' + (d.first || 'friend') + ' 👋';
-    $('pt-sub').textContent = (d.cohort ? d.cohort + ' · ' : '') + 'Live online · Tue 27 & Wed 28 October, 5:00–8:00 PM (WAT).';
+    $('pt-sub').textContent = (d.cohort ? d.cohort + ' · ' : '') + 'Live online · Sat 28 & Sun 29 November, 5:00–8:00 PM (WAT).';
     // class card
     var cc = $('pt-class'); cc.replaceChildren();
     var t = el('div'); t.appendChild(el('b', 'Live class')); t.appendChild(el('span', 'Join 10 minutes early with your phone charged and an AI app ready.'));
@@ -77,7 +77,7 @@
     var both = d.attendance.d1 && d.attendance.d2;
     var s3 = step(3, 'Attendance', both ? 'Complete' : '', both ? 'ok' : '');
     var days = el('div', null, 'pt-days');
-    [['d1', 'Day 1 · Tue 27 Oct'], ['d2', 'Day 2 · Wed 28 Oct']].forEach(function (x) {
+    [['d1', 'Day 1 · Sat 28 Nov'], ['d2', 'Day 2 · Sun 29 Nov']].forEach(function (x) {
       var box = el('div', null, 'pt-day' + (d.attendance[x[0]] ? ' ok' : ''));
       box.appendChild(el('b', x[1]));
       if (d.attendance[x[0]]) box.appendChild(el('span', '✓ Checked in'));

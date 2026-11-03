@@ -135,14 +135,14 @@ textarea{font:inherit;font-size:14px;border:1.5px solid var(--line);border-radiu
         <p class="sub">Check each transfer in your bank app, then click <b>Confirm</b>. <b>Send link</b> opens WhatsApp with the class link ready to send. <b>Share to group</b> (only for people who ticked 📣) opens WhatsApp with a welcome message — choose your community group and send. Receipts are never shared. <span class="tagb">EARLY BIRD</span> marks the first 15 confirmed per cohort.</p>
         <div class="toolbar">
           <input class="grow" id="q" placeholder="Search name, phone, business, city…">
-          <select id="fsrc"><option value="enrollment">Paid enrollments</option><option value="registration">Old interest list</option></select>
-          <select id="fstat"><option value="">All payments</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="rejected">Rejected</option></select>
+          <select id="fsrc"><option value="enrollment">Paid enrollments</option><option value="free-session">Free session sign-ups (14 Nov)</option><option value="registration">Old interest list</option></select>
+          <select id="fstat"><option value="">All payments</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="balance">Balance due</option><option value="rejected">Rejected</option></select>
           <select id="fc"><option value="">All cohorts</option></select>
           <button class="sbtn light" id="reload" type="button">Refresh</button>
           <button class="sbtn light" id="csv" type="button">Download CSV</button>
           <button class="sbtn gold" id="issue" type="button" disabled>Issue participation certificates (0)</button>
         </div>
-        <div class="tbl"><table><thead><tr><th><input type="checkbox" id="all" aria-label="Select all"></th><th>Date</th><th>Name</th><th>WhatsApp</th><th>Payment</th><th>Paid from · amount · date</th><th>Receipt</th><th>About</th><th>City</th><th>Actions</th></tr></thead><tbody id="rows"></tbody></table></div>
+        <div class="tbl"><table><thead><tr><th><input type="checkbox" id="all" aria-label="Select all"></th><th>Date</th><th>Name</th><th>WhatsApp</th><th>Payment</th><th>Paid from · amount · date / question</th><th>Receipt</th><th>About</th><th>City</th><th>Actions</th></tr></thead><tbody id="rows"></tbody></table></div>
       </div>
     </section>
 
@@ -245,6 +245,7 @@ textarea{font:inherit;font-size:14px;border:1.5px solid var(--line);border-radiu
         <div class="field"><label for="s-note">Note under the date <span class="opt">(optional)</span></label><input id="s-note" name="cohort_note" placeholder="e.g. Classes hold 10am–1pm on Tuesday and Wednesday." maxlength="300"></div>
         <div class="note">Leave the date empty to show "Date announced in the WhatsApp group". Past dates are hidden automatically.</div>
         <h3 style="margin:18px 0 8px;color:var(--navy2)">Private — for confirmed participants only</h3>
+        <div class="field"><label for="s-free">Free session link (14 Nov, Google Meet)</label><input id="s-free" placeholder="https://meet.google.com/…" maxlength="300"></div>
         <div class="field"><label for="s-join">Class link (Google Meet or Telegram)</label><input id="s-join" placeholder="https://meet.google.com/… or https://t.me/…" maxlength="300"></div>
         <div class="field"><label for="s-jmsg">Message sent with the link <span class="opt">(optional — {name}, {link}, {code} and {portal} are filled in for you)</span></label><textarea id="s-jmsg" maxlength="800" rows="8" style="min-height:190px"></textarea></div>
         <div class="note">This link is never shown on the public website. It is only used by the <b>Send link</b> button on confirmed enrollments.</div>

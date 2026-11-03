@@ -69,6 +69,10 @@
   var msg = document.getElementById('f-msg'), btn = document.getElementById('f-submit');
   var today = new Date(); var pd = form.elements.payment_date;
   if (pd && !pd.value) pd.value = new Date(today.getTime() - today.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+  // instalment plan sets the amount
+  form.querySelectorAll('input[name=payment_plan]').forEach(function (r) {
+    r.addEventListener('change', function () { var amt = form.elements.amount_paid; if (r.checked) amt.value = r.value === 'instalment' ? 7500 : 15000; });
+  });
   var phoneOk = function (v) { var d = v.replace(/[^\d+]/g, ''); return /^(\+?234|0)[789]\d{9}$/.test(d) || /^\+?\d{10,15}$/.test(d); };
   var emailOk = function (v) { return !v || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); };
   function fileOk() {
@@ -119,11 +123,11 @@
         var name = form.elements.full_name.value.trim();
         document.getElementById('s-name').textContent = name;
         var C = window.SITE_CONFIG || {};
-        var text = 'Hello Royalstars, I just enrolled for Grow Your Sales with AI Skills (Cohort 1).\nName: ' + name +
-          '\nPhone: ' + form.elements.phone.value.trim() + '\nAmount: ₦' + form.elements.amount_paid.value +
+        var text = 'Hello Royalstars, I just enrolled for Grow Your Sales with AI Skills (Cohort 2).\nName: ' + name +
+          '\nPhone: ' + form.elements.phone.value.trim() + '\nAmount: ₦' + form.elements.amount_paid.value + ((form.querySelector('input[name=payment_plan]:checked') || {}).value === 'instalment' ? ' (1st of 2 instalments)' : '') +
           '\nPaid from: ' + form.elements.sender_name.value.trim() + '\nDate: ' + form.elements.payment_date.value + '\nHere is my payment receipt:';
         document.getElementById('s-receipt').href = 'https://wa.me/' + (C.PHONE_INTL || '2347039106808') + '?text=' + encodeURIComponent(text);
-        var share = 'I just enrolled for *Grow Your Sales with AI Skills* by Royalstars Technologies 🚀\n\nLive online class: Tue 27 & Wed 28 October, 5–8 PM. You learn to use AI to find customers, sell more and keep proper records.\n\nIt is ₦15,000 now (normally ₦50,000), and the first 15 confirmed get 6 months FREE Google Gemini AI. Join me 👉 ' + location.origin + '/?ref=share#register';
+        var share = 'I just enrolled for *Grow Your Sales with AI Skills* by Royalstars Technologies 🚀\n\nLive online class: Sat 28 & Sun 29 November, 5–8 PM. You learn to use AI to find customers, sell more and keep proper records.\n\nIt is ₦15,000 now (normally ₦50,000), and the first 15 confirmed get 6 months FREE Google Gemini AI. Join me 👉 ' + location.origin + '/?ref=share#register';
         var sh = document.getElementById('s-share');
         if (sh) { sh.href = 'https://wa.me/?text=' + encodeURIComponent(share); sh.onclick = function () { window.track('share', { method: 'whatsapp', content_type: 'enrollment' }); }; }
         form.style.display = 'none';

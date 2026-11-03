@@ -19,7 +19,7 @@ async function netlify(path, init = {}) {
 }
 
 const FIELDS = ['full_name', 'phone', 'email', 'participant_type', 'business_name', 'business_type', 'location', 'heard_from', 'cohort',
-  'sender_name', 'amount_paid', 'payment_date', 'payment_ref', 'announce_ok', 'referred_by'];
+  'sender_name', 'amount_paid', 'payment_date', 'payment_ref', 'announce_ok', 'referred_by', 'payment_plan', 'question'];
 const fileUrl = (v) => (v && typeof v === 'object' ? v.url : (typeof v === 'string' && /^https?:\/\//.test(v) ? v : '')) || '';
 async function registrations(siteId, formName) {
   const forms = await netlify(`/sites/${siteId}/forms`);
@@ -39,6 +39,7 @@ async function registrations(siteId, formName) {
     row.proof_url = fileUrl(d.proof);
     const st = formName === 'enrollment' ? await pay.get(s.id, { type: 'json' }) : null;
     row.payment_status = st?.status || 'pending';
+    row.balance_paid = !!st?.balance_paid;
     row.payment_updated = st?.at || '';
     return row;
   }));
@@ -82,7 +83,7 @@ export default async (req, context) => {
     const siteId = context?.site?.id || process.env.SITE_ID;
 
     if (route === 'registrations' && method === 'GET') {
-      const formName = url.searchParams.get('form') === 'registration' ? 'registration' : 'enrollment';
+      const formName = ['registration', 'free-session'].includes(url.searchParams.get('form')) ? url.searchParams.get('form') : 'enrollment';
       const items = await registrations(siteId, formName);
       if (formName === 'enrollment') {
         // every confirmed participant gets a personal portal access code
@@ -111,7 +112,9 @@ export default async (req, context) => {
       const id = clean(body.id, 40);
       const status = ['pending', 'confirmed', 'rejected'].includes(body.status) ? body.status : null;
       if (!/^[a-f0-9]+$/i.test(id) || !status) return json({ error: 'Bad request' }, 400);
-      const rec = { status, at: new Date().toISOString(), cohort: clean(body.cohort, 120) };
+      const prev = (await paymentStore().get(id, { type: 'json' })) || {};
+      const rec = { status, at: new Date().toISOString(), cohort: clean(body.cohort, 120), balance_paid: typeof body.balance === 'boolean' ? body.balance : !!prev.balance_paid };
+      if (typeof body.balance === 'boolean') rec.balance_at = new Date().toISOString();
       await paymentStore().setJSON(id, rec);
       await recountStats().catch(() => {});
       if (status === 'confirmed' && body.person) {
@@ -131,15 +134,16 @@ export default async (req, context) => {
 
     if (route === 'settings' && method === 'GET') {
       const priv = (await siteStore().get('private', { type: 'json' })) || {};
-      return json({ ...(await readSettings()), join_link: priv.join_link || '', join_message: priv.join_message || '' });
+      return json({ ...(await readSettings()), join_link: priv.join_link || '', join_message: priv.join_message || '', free_link: priv.free_link || '' });
     }
     if (route === 'settings' && method === 'PUT') {
       const s = {};
       for (const k of Object.keys(DEFAULT_SETTINGS)) s[k] = clean(body[k], k === 'cohort_note' ? 300 : 200);
       if (s.whatsapp_group && !/^https:\/\/(chat\.whatsapp\.com|wa\.me|whatsapp\.com)\//i.test(s.whatsapp_group)) return json({ error: 'WhatsApp link must start with https://chat.whatsapp.com/' }, 400);
       if (s.cohort_start && isNaN(new Date(s.cohort_start))) return json({ error: 'Invalid date' }, 400);
-      const priv = { join_link: clean(body.join_link, 300), join_message: String(body.join_message ?? '').replace(/\r/g, '').replace(/[\u0000-\u0009\u000b-\u001f<>]/g, '').trim().slice(0, 800) };
+      const priv = { free_link: clean(body.free_link, 300), join_link: clean(body.join_link, 300), join_message: String(body.join_message ?? '').replace(/\r/g, '').replace(/[\u0000-\u0009\u000b-\u001f<>]/g, '').trim().slice(0, 800) };
       if (priv.join_link && !/^https:\/\//i.test(priv.join_link)) return json({ error: 'Class link must start with https://' }, 400);
+      if (priv.free_link && !/^https:\/\//i.test(priv.free_link)) return json({ error: 'Free session link must start with https://' }, 400);
       await siteStore().setJSON('settings', s);
       await siteStore().setJSON('private', priv);
       return json({ ...s, ...priv });
