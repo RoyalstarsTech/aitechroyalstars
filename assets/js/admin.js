@@ -66,8 +66,6 @@
       var count = {}, conf = {};
       regs.forEach(function (r) {
         var k = r.cohort || '(no cohort)'; count[k] = (count[k] || 0) + 1;
-        if (src === 'enrollment') { if (fullyPaid(r)) { conf[k] = (conf[k] || 0) + 1; r._early = conf[k] <= 15; } }
-        else if (src === 'registration') r._early = count[k] <= 15;
       });
       var fc = $('fc'), cur = fc.value; fc.replaceChildren(el('option', 'All cohorts'));
       fc.firstChild.value = '';
@@ -128,13 +126,11 @@
   function shareToGroup(r) {
     var k = r.cohort || '(no cohort)';
     var confirmed = regs.filter(function (x) { return (x.cohort || '(no cohort)') === k && x.payment_status === 'confirmed'; }).length;
-    var left = Math.max(0, 15 - confirmed);
     var first = String(r.full_name || '').trim().split(/\s+/)[0];
     var about = [r.business_type, r.location].filter(Boolean).join(', ');
     var text = '🎉 Please welcome *' + first + '*' + (about ? ' (' + about + ')' : '') + ', seat confirmed! ✅\n\n' +
       confirmed + ' participant' + (confirmed === 1 ? '' : 's') + ' confirmed for *Grow Your Sales with AI Skills*' + (r.cohort ? ' (' + r.cohort + ')' : '') + '.\n' +
-      (left > 0 ? 'Only ' + left + ' early-bird spot' + (left === 1 ? '' : 's') + ' left: 6 months FREE Google Gemini AI + Google One storage. 🎁\n'
-                : 'Early-bird spots are all taken, but seats are still open.\n') +
+      'Seats are still open for Cohort 2. You can pay ₦15,000 in full or in two parts. 🎓\n' +
       '\nLive online: Sat 28 & Sun 29 Nov, 5–8 PM. Fee ₦15,000.\nEnrol here 👉 ' + siteUrl();
     window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
   }
@@ -147,7 +143,6 @@
       var td0 = el('td'); td0.appendChild(cb); tr.appendChild(td0);
       tr.appendChild(el('td', fmtDate(r.created_at)));
       var tdn = el('td'); tdn.appendChild(el('strong', r.full_name || '')); if (r.email) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('small', r.email)); }
-      if (r._early) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('span', 'EARLY BIRD', 'tagb')); }
       if (r.announce_ok) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('small', '📣 OK to welcome in group')); }
       if (r.access_code) { tdn.appendChild(document.createElement('br')); tdn.appendChild(el('span', r.access_code, 'tagp mono')); } tr.appendChild(tdn);
       var tdp = el('td'); var n = intl(r.phone); if (n) { var a = el('a', r.phone); a.href = 'https://wa.me/' + n; a.target = '_blank'; a.rel = 'noopener'; tdp.appendChild(a); } else tdp.textContent = r.phone || ''; tr.appendChild(tdp);
@@ -181,8 +176,8 @@
   $('fsrc').onchange = function () { src = $('fsrc').value; selected.clear(); updIssue(); loadRegs(); };
   $('all').onchange = function () { filtered().forEach(function (r) { $('all').checked ? selected.add(r.id) : selected.delete(r.id); }); renderRegs(); updIssue(); };
   $('csv').onclick = function () {
-    csv([['Date', 'Name', 'WhatsApp', 'Email', 'Payment status', 'Paid from', 'Amount', 'Payment date', 'Reference', 'Receipt', 'I am', 'Business/idea', 'Business name', 'City', 'Heard from', 'Cohort', 'Early bird', 'OK to welcome in group', 'Referred by', 'Access code', 'Payment plan', 'Balance paid', 'Question']].concat(filtered().map(function (r) {
-      return [fmtDate(r.created_at), r.full_name, r.phone, r.email, r.payment_status, r.sender_name, r.amount_paid, r.payment_date, r.payment_ref, r.proof_url, r.participant_type, r.business_type, r.business_name, r.location, r.heard_from, r.cohort, r._early ? 'Yes' : '', r.announce_ok ? 'Yes' : '', r.referrer || '', r.access_code || '', isInst(r) ? 'Instalments' : (src === 'enrollment' ? 'Full' : ''), isInst(r) ? (r.balance_paid ? 'Yes' : 'No') : '', r.question || ''];
+    csv([['Date', 'Name', 'WhatsApp', 'Email', 'Payment status', 'Paid from', 'Amount', 'Payment date', 'Reference', 'Receipt', 'I am', 'Business/idea', 'Business name', 'City', 'Heard from', 'Cohort', 'OK to welcome in group', 'Referred by', 'Access code', 'Payment plan', 'Balance paid', 'Question']].concat(filtered().map(function (r) {
+      return [fmtDate(r.created_at), r.full_name, r.phone, r.email, r.payment_status, r.sender_name, r.amount_paid, r.payment_date, r.payment_ref, r.proof_url, r.participant_type, r.business_type, r.business_name, r.location, r.heard_from, r.cohort, r.announce_ok ? 'Yes' : '', r.referrer || '', r.access_code || '', isInst(r) ? 'Instalments' : (src === 'enrollment' ? 'Full' : ''), isInst(r) ? (r.balance_paid ? 'Yes' : 'No') : '', r.question || ''];
     })), src + '.csv');
   };
   $('issue').onclick = function () {
