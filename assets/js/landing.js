@@ -63,6 +63,12 @@
   var msg = document.getElementById('f-msg'), btn = document.getElementById('f-submit');
   var today = new Date(); var pd = form.elements.payment_date;
   if (pd && !pd.value) pd.value = new Date(today.getTime() - today.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+  // instalments are offered until the end of Wed 25 Nov 2026 (WAT); after that, full payment only
+  if (Date.now() >= Date.parse('2026-11-26T00:00:00+01:00')) {
+    document.querySelectorAll('.js-inst').forEach(function (el) { el.remove(); });
+    var full = form.querySelector('input[name=payment_plan][value=full]'); if (full) full.checked = true;
+    if (form.elements.amount_paid) form.elements.amount_paid.value = 15000;
+  }
   // instalment plan sets the amount
   form.querySelectorAll('input[name=payment_plan]').forEach(function (r) {
     r.addEventListener('change', function () { var amt = form.elements.amount_paid; if (r.checked) amt.value = r.value === 'instalment' ? 7500 : 15000; });
